@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "803357655122",
+    "project_id": "dreams-decoder-309dc",
+    "storage_bucket": "dreams-decoder-309dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803357655122:android:3df7b9080433c796b3df8b",
+        "android_client_info": {
+          "package_name": "com.example.dreams_decoder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "803357655122-86cr6c0pjb34rfnhh0oe62627g0raqc6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjYqOhNFf2hE1R5v1mC7vzJqnjHyZtFFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "803357655122-86cr6c0pjb34rfnhh0oe62627g0raqc6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
