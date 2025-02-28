@@ -1,7 +1,8 @@
 import 'package:dreams_decoder/pages/payments/upgrade.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dreams_decoder/pages/auth/signin.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -30,17 +31,16 @@ void upgradeSubscription(BuildContext context) {
     context,
     MaterialPageRoute(builder: (context) => Upgrade())
   );
-
 }
 
 class _ProfileState extends State<Profile> {
-  final user = FirebaseAuth.instance.currentUser;
 
   signOut() async {
-    await FirebaseAuth.instance.signOut().then((value) => {
-      if(mounted) 
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()))
-    });
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.remove('token');
+
+    showSuccessSnackbar(context, "Logged out successfully");
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()));
   }
 
   @override

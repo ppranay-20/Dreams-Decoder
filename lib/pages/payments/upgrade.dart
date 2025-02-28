@@ -1,7 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dreams_decoder/pages/dream_history.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+
+import 'package:dreams_decoder/utils/convert-to-uri.dart';
+import 'package:dreams_decoder/utils/getIdFromJWT.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Upgrade extends StatefulWidget {
   const Upgrade({super.key});
@@ -11,7 +14,7 @@ class Upgrade extends StatefulWidget {
 }
 
 Widget profileOption(IconData icon, String title, String description,
-    String dollar, BuildContext context, VoidCallback func) {
+    int dollar, BuildContext context, VoidCallback func) {
   return Card(
     color: Colors.grey.shade900,
     elevation: 2,
@@ -32,118 +35,109 @@ Widget profileOption(IconData icon, String title, String description,
 }
 
 class _UpgradeState extends State<Upgrade> {
-  Future<void> upgradeSubscription(String plan) async {
+  bool isLoading = true;
+  List<dynamic> paymentPlans = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getPaymentPlans();
+  }
+
+  void getPaymentPlans() async {
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        return;
-      }
+      final url = getAPIUrl('payment-plans');
+      final response =
+          await http.get(url, headers: {'Content-Type': 'application/json'});
 
-      String userId = currentUser.uid;
-      QuerySnapshot userData = await FirebaseFirestore.instance
-          .collection("User")
-          .where("user_id", isEqualTo: userId)
-          .limit(1)
-          .get();
-
-      print(userData);
-
-      if (userData.docs.isNotEmpty) {
-        DocumentSnapshot userDoc = userData.docs.first;
-        String docId = userDoc.id;
-
-        int currentMessages = userDoc['message_limit'];
-
-        int additionalMessages = 0;
-        switch (plan) {
-          case "silver":
-            additionalMessages = 50;
-            break;
-          case "gold":
-            additionalMessages = 100;
-            break;
-          case "diamond":
-            additionalMessages = 200;
-            break;
-        }
-
-        int newLimit = currentMessages + additionalMessages;
-
-        await FirebaseFirestore.instance
-            .collection("User")
-            .doc(docId)
-            .update({'message_limit': newLimit});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Upgraded to $plan! New limit: $newLimit messages"),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0)),
-          ),
-        );
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => DreamHistory()));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          isLoading = false;
+          paymentPlans = data['data'];
+        });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("User document not found"),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        ));
+        if(!mounted) return;
+        setState(() => isLoading = false);
+        showErrorSnackBar(context, "Failed to load payment plans");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error upgrading subscription: $e"),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      ));
+      setState(() {
+        isLoading = false;
+      });
+      debugPrint("An error occured $e");
+    }
+  }
+
+  void upgradeSubscription(dynamic plan) async {
+    final customerId = await getIdFromJWT();
+    final paymentPlanId = plan['id'];
+    String now = DateTime.now().toUtc().toIso8601String();
+    final int expirationDays = plan['expiration_days'];
+    DateTime expirationDate = DateTime.now().add(Duration(days: expirationDays));
+
+    final paymentPayload = {
+      'customer_id': customerId,
+      'payment_plan_id': paymentPlanId,
+      'payment_date': now,
+      'expiration_date': expirationDate.toUtc().toIso8601String()
+    };
+
+    try {
+      final url = getAPIUrl('payments');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode(paymentPayload)
+      );
+
+      if(response.statusCode == 200) {
+        debugPrint("Payment Updated Successfully");
+        showSuccessSnackbar(context, "Payment Done Successfully");
+      } else {
+         debugPrint("Failed to update payment status");
+      }
+    } catch (e) {
+      debugPrint("An error Occured $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
-          "Upgrade Subscription",
-          style: TextStyle(
-              fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          title: Text(
+            "Upgrade Subscription",
+            style: TextStyle(
+                fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          profileOption(
-              Icons.add_ic_call_outlined,
-              "Silver",
-              "This Subscription Gives you 50 more messages",
-              "20",
-              context, () {
-            upgradeSubscription("silver");
-          }),
-          profileOption(
-              Icons.add_ic_call_outlined,
-              "Gold",
-              "This Subscription Gives you 100 more messages",
-              "40",
-              context, () {
-            upgradeSubscription("gold");
-          }),
-          profileOption(
-              Icons.add_ic_call_outlined,
-              "Diamond",
-              "This Subscription Gives you 200 more messages",
-              "60",
-              context, () {
-            upgradeSubscription("diamond");
-          }),
-        ],
-      ),
-    );
+        body: isLoading
+            ? Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            : paymentPlans.isEmpty
+                ? Center(
+                    child: Text("No payment plans available",
+                        style: TextStyle(color: Colors.white70)),
+                  )
+                : ListView.builder(
+                    itemCount: paymentPlans.length,
+                    itemBuilder: (context, index) {
+                      final plan = paymentPlans[index];
+                      return profileOption(
+                          Icons.upgrade,
+                           plan['name'],
+                          "This is basic plan",
+                          plan['amount'],
+                          context,
+                          () => upgradeSubscription(plan));
+                    },
+                  ));
   }
 }

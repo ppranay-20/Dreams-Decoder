@@ -1,8 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dreams_decoder/pages/dream_history.dart';
+import 'dart:convert';
+
 import 'package:dreams_decoder/pages/auth/signin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dreams_decoder/utils/convert-to-uri.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -37,39 +39,32 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  signUp(String username, String email, String password, String confirmPassword) async {
+  void signUp(String username, String email, String password,
+      String confirmPassword, BuildContext context) async {
     if (username == "" ||
         email == "" ||
         password == "" ||
         confirmPassword == "") {
-      showAlertDialog("All fields are required!");
+      showErrorSnackBar(context, "All fields are required");
       return;
     } else if (password != confirmPassword) {
-      showAlertDialog("Passwords do not match!");
+      showErrorSnackBar(context,"Passwords do not match!");
       return;
     } else {
       try {
-        UserCredential userCred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        final url = getAPIUrl('auth/register');
+        final response = await http.post(url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(
+                {'name': username, 'email': email, 'password': password}));
 
-        String userId = userCred.user!.uid;
-        DateTime now = DateTime.now();
-
-        FirebaseFirestore.instance.collection("User").doc().set({
-          "user_id": userId,
-          "email": email,
-          "message_limit": 20,
-          "created_at": now
-        }).then((value) => {
-          if(mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DreamHistory()),
-            )
-          }
-        });
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          showSuccessSnackbar(context,"Signup successful!");
+          Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()));
+        } else {
+          debugPrint("Error: ${response.statusCode} - ${response.body}");
+          showAlertDialog("Signup failed: ${response.body}");
+        }
       } catch (e) {
         showAlertDialog(e.toString());
       }
@@ -104,7 +99,8 @@ class _SignupState extends State<Signup> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text("Username", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text("Username",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                     TextField(
                       controller: usernameController,
                       decoration: InputDecoration(
@@ -114,7 +110,8 @@ class _SignupState extends State<Signup> {
                       style: TextStyle(color: Colors.white),
                     ),
                     SizedBox(height: 15),
-                    Text("Email", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text("Email",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                     TextField(
                       controller: emailController,
                       decoration: InputDecoration(
@@ -124,7 +121,8 @@ class _SignupState extends State<Signup> {
                       style: TextStyle(color: Colors.white),
                     ),
                     SizedBox(height: 15),
-                    Text("Password", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text("Password",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                     TextField(
                       controller: passwordController,
                       obscureText: true,
@@ -135,7 +133,8 @@ class _SignupState extends State<Signup> {
                       style: TextStyle(color: Colors.white),
                     ),
                     SizedBox(height: 15),
-                    Text("Confirm Password", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text("Confirm Password",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                     TextField(
                       controller: confirmPasswordController,
                       obscureText: true,
@@ -148,7 +147,12 @@ class _SignupState extends State<Signup> {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        signUp(usernameController.text.toString(),emailController.text.toString(),passwordController.text.toString(), confirmPasswordController.text.toString());
+                        signUp(
+                            usernameController.text.toString(),
+                            emailController.text.toString(),
+                            passwordController.text.toString(),
+                            confirmPasswordController.text.toString(),
+                            context);
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -162,7 +166,10 @@ class _SignupState extends State<Signup> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Signin()));
                         },
                         child: Text(
                           "Already have an account? Login Now!",

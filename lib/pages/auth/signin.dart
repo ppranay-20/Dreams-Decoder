@@ -1,8 +1,14 @@
-import 'package:dreams_decoder/pages/dream_history.dart';
+import 'dart:convert';
+
+import 'package:dreams_decoder/pages/home/dream_history.dart';
 import 'package:dreams_decoder/pages/auth/signup.dart';
+import 'package:dreams_decoder/utils/convert-to-uri.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Signin extends StatefulWidget {
   const Signin({super.key});
@@ -35,21 +41,32 @@ class _SigninState extends State<Signin> {
     );
   }
 
-  login(String email, String password) async {
+  void login(String email, String password, BuildContext context) async {
     if (email == "" || password == "") {
-      showAlertDialog("Enter email and passowrd");
+      showErrorSnackBar(context, "Email and Password required");
       return;
     }
 
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then((value) => {
-                if (mounted)
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => DreamHistory()))
-              });
+      final url = getAPIUrl('auth/login');
+      final response = await http.post(url,body: jsonEncode({
+        "email": email,
+        "password": password
+      }), headers: {
+        'Content-Type': 'application/json'
+      });
+
+      if (response.statusCode == 200) {
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        pref.setString('token', token);
+        showSuccessSnackbar(context, "Login Successful");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DreamHistory()));
+      }
+
     } on FirebaseAuthException catch (ex) {
+      debugPrint("Error $ex");
       showAlertDialog(ex.code.toString());
     }
   }
@@ -132,7 +149,8 @@ class _SigninState extends State<Signin> {
                     ElevatedButton(
                       onPressed: () {
                         login(emailController.text.toString(),
-                            passwordController.text.toString());
+                            passwordController.text.toString(),
+                            context);
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

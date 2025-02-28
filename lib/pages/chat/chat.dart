@@ -1,13 +1,14 @@
+import 'dart:convert';
+import 'package:uuid/uuid.dart';
+import 'package:dreams_decoder/utils/convert-to-uri.dart';
+import 'package:dreams_decoder/utils/getIdFromJWT.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
-  final String? dreamId;
+  final Map<String, dynamic> chat;
 
-  ChatPage({this.dreamId});
+  ChatPage({required this.chat});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -15,144 +16,81 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, String>> _messages = [];
+  List<Map<String, dynamic>> messages = [];
+  bool status = false;
   bool _isLoading = false;
-  String? dreamId;
+  Map<String, dynamic>? chat;
+  late int messageLimit = 0;
+  late int charaterLimit = 0;
 
-  late GenerativeModel model;
 
   @override
-  void initState() {
-    String apikey = dotenv.env['API_KEY'] as String;
-
-    if(apikey.isEmpty) {
-      throw Exception("API Key is missing");
-    }
-
-    super.initState();
-    model = GenerativeModel(model: 'gemini-pro', apiKey: apikey);
-    _setupChat();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    messages = List<Map<String, dynamic>>.from(widget.chat['messages'] ?? []);
+    status = widget.chat['status'] == "open" ? true : false;
+    getMessageLimit();
   }
 
-  Future<void> _setupChat() async {
-    dreamId = widget.dreamId ?? await _createNewDream();
-    await _fetchMessages();
-  }
+  void getMessageLimit() async {
+    final userId = await getIdFromJWT();
+    final url = getAPIUrl('users/$userId');
+    try {
+      final response = await http.get(url);
 
-  Future<void> _fetchMessages() async {
-    if (dreamId == null) return;
-    var dreamDoc = await FirebaseFirestore.instance
-        .collection("Dreams")
-        .doc(dreamId)
-        .get();
-
-    if (dreamDoc.exists) {
-      List<dynamic> fetchedMessages = dreamDoc["chats"] ?? [];
-      setState(() {
-        _messages.clear();
-        _messages.addAll(fetchedMessages
-            .map((msg) => {"sender": msg["sender"], "text": msg["text"]}));
-      });
-
-      if(fetchedMessages.isNotEmpty && fetchedMessages.last["sender"] == "ai") {
-        var lastMessage = fetchedMessages.last;
-        Timestamp lastTimestamp = lastMessage["created_at"]; // Firestore timestamp
-        DateTime lastMessageTime = lastTimestamp.toDate();
-        DateTime currentTime = DateTime.now();
-
-        if(currentTime.difference(lastMessageTime).inMinutes > 10) {
-          await FirebaseFirestore.instance
-            .collection("Dreams")
-            .doc(dreamId)
-            .update({"status": "end"});
-        }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          messageLimit = data['data']['message_limit'] ?? 0;
+          charaterLimit = data['data']['charater_limit'] ?? 0;
+        });
       }
-
+    } catch (e) {
+      debugPrint("An error occured $e");
     }
-  }
-
-  Future<String> _createNewDream() async {
-    var user = FirebaseAuth.instance.currentUser;
-    var doc = await FirebaseFirestore.instance.collection("Dreams").add({
-      "userId": user?.uid,
-      "chats": [],
-      "status": "new",
-      "createdAt": FieldValue.serverTimestamp(),
-    });
-    return doc.id;
   }
 
   Future<void> sendMessage() async {
     String userText = _messageController.text.trim();
     if (userText.isEmpty) return;
+    var uuid = Uuid();
+
+    Map<String, String> messagePayload = {
+      "id": uuid.v4(),
+      "chat_id": widget.chat['id'],
+      "sent_by": "user",
+      "sent": DateTime.now().toUtc().toIso8601String(),
+      "content": userText
+    };
 
     setState(() {
-      _messages.add({"sender": "user", "text": userText});
+      messages.add(messagePayload);
       _messageController.clear();
       _isLoading = true;
     });
 
     try {
-      final content = Content.text("Answer concisely in **under 100 characters**. Be brief and to the point: $userText");
-      final response = await model.generateContent([content]);
-      String botResponse =
-          response.text ?? "Sorry, I couldn't understand that.";
+      final url = getAPIUrl('message');
+      
+      final response = await http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(messagePayload));
 
-      setState(() {
-        _messages.add({"sender": "ai", "text": botResponse});
-      });
-
-      await _updateFirestoreMessages(userText, botResponse);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final messageFromResonse = data['data'];
+        setState(() {
+          messages.add(messageFromResonse);
+          messageLimit--;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _messages
-            .add({"sender": "ai", "text": "Error: Failed to get a response."});
-      });
+      debugPrint("An error occured $e");
     }
 
     setState(() {
       _isLoading = false;
     });
-  }
-
-  Future<void> _updateFirestoreMessages(
-      String userText, String botResponse) async {
-    if (dreamId == null) return;
-    await FirebaseFirestore.instance.collection("Dreams").doc(dreamId).update({
-      "chats": FieldValue.arrayUnion([
-        {"sender": "user", "text": userText, "created_at": DateTime.now()},
-        {"sender": "ai", "text": botResponse, "created_at": DateTime.now()},
-      ])
-    });
-  }
-
-  Future<int> findMessageLimit() async {
-    var userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == "") {
-      throw Exception("User ID is null or empty");
-    }
-
-    try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection("User")
-          .where("user_id", isEqualTo: userId)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        var data = querySnapshot.docs.first.data();
-        if (data.containsKey("message_limit")) {
-          return data["message_limit"] as int;
-        } else {
-          throw Exception("No message limit found in Firestore.");
-        }
-      } else {
-        throw Exception("No user data found in Firestore.");
-      }
-    } catch (e) {
-      debugPrint("Error fetching message limit: $e");
-      rethrow;
-    }
   }
 
   void endChat() {
@@ -172,38 +110,31 @@ class _ChatPageState extends State<ChatPage> {
               TextButton(
                 onPressed: () async {
                   try {
-                    await FirebaseFirestore.instance
-                        .collection("Dreams")
-                        .doc(dreamId)
-                        .update({"status": "end"});
-                        setState(() {});
+                    final chatId = widget.chat['id'];
+                    final url = getAPIUrl('chat/end-chat/$chatId');
+
+                    final response =
+                        await http.put(url, body: jsonEncode({"status": "closed"}));
+
+                    if (response.statusCode == 200) {
+                      final data = jsonDecode(response.body);
+                      final updatedChat = data['data'];
+
+                      setState(() {
+                        chat = updatedChat;
+                        status = updatedChat["status"] == "open" ? true : false;
+                        Navigator.pop(context);
+                      });
+                    }
                   } catch (e) {
-                    debugPrint("Error in deleteing the message $e");
-                  } // End the chat
-                  Navigator.pop(context); // Close the dialog
+                    debugPrint("An error occured $e");
+                  }
                 },
                 child: Text("Yes", style: TextStyle(color: Colors.red)),
               ),
             ],
           );
         });
-  }
-
-  Future<bool> isChatOpen() async {
-    try {
-      var doc = await FirebaseFirestore.instance
-          .collection("Dreams")
-          .doc(dreamId)
-          .get();
-
-      if (doc.exists) {
-        var data = doc.data();
-        return data?["status"] == "new";
-      }
-    } catch (e) {
-      debugPrint("Error fetching chat status: $e");
-    }
-    return false;
   }
 
   @override
@@ -221,25 +152,19 @@ class _ChatPageState extends State<ChatPage> {
         title: Text("Dream Decoder", style: TextStyle(color: Colors.white)),
         centerTitle: true,
         actions: [
-          FutureBuilder(
-              future: isChatOpen(),
-              builder: (context, snapshot) {
-                if (snapshot.data == true) {
-                  return TextButton(
-                      onPressed: () {
-                        endChat();
-                      },
-                      child: Text(
-                        "End Chat",
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.red,
-                            fontWeight: FontWeight.normal),
-                      ));
-                }
-
-                return SizedBox();
-              })
+          status
+              ? TextButton(
+                  onPressed: () {
+                    endChat();
+                  },
+                  child: Text(
+                    "End Chat",
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.red,
+                        fontWeight: FontWeight.normal),
+                  ))
+              : SizedBox()
         ],
       ),
       body: Column(
@@ -265,24 +190,10 @@ class _ChatPageState extends State<ChatPage> {
                     children: [
                       Icon(Icons.message, color: Colors.white70, size: 16),
                       SizedBox(width: 5),
-                      FutureBuilder(
-                          future: findMessageLimit(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Text("Loading...",
-                                  style: TextStyle(color: Colors.white70));
-                            } else if (snapshot.hasError) {
-                              return Text(snapshot.error.toString(),
-                                  style: TextStyle(color: Colors.red));
-                            } else {
-                              int messageLimit = snapshot.data!;
-                              return Text(
-                                "Messages: ${(_messages.length).toInt()}/$messageLimit",
-                                style: TextStyle(color: Colors.white70),
-                              );
-                            }
-                          }),
+                      Text(
+                        "Messages: $messageLimit",
+                        style: TextStyle(color: Colors.white70),
+                      )
                     ],
                   ),
                 ),
@@ -292,9 +203,9 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              itemCount: _messages.length,
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                bool isUser = _messages[index]["sender"] == "user";
+                bool isUser = messages[index]["sent_by"] == "user";
                 return Align(
                   alignment:
                       isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -306,7 +217,7 @@ class _ChatPageState extends State<ChatPage> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Text(
-                      _messages[index]["text"]!,
+                      messages[index]["content"]!,
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -320,62 +231,44 @@ class _ChatPageState extends State<ChatPage> {
               child: CircularProgressIndicator(color: Colors.blueAccent),
             ),
           Padding(
-            padding: EdgeInsets.all(10),
-            child: FutureBuilder<bool>(
-              future: isChatOpen(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text(
-                    "Checking chat status",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade500,
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError || snapshot.data == false) {
-                  return Center(
-                    child: Text(
-                      "Your chat is closed",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  );
-                }
-
-                return Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey.shade900,
-                          hintText: "Type a message...",
-                          hintStyle: TextStyle(color: Colors.white70),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
+              padding: EdgeInsets.all(10),
+              child: !status
+                  ? Center(
+                      child: Text(
+                        "Your chat is closed",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey.shade500,
                         ),
                       ),
-                    ),
-                    SizedBox(width: 10),
-                    FloatingActionButton(
-                      onPressed: sendMessage,
-                      backgroundColor: Colors.blueAccent,
-                      child: Icon(Icons.send, color: Colors.white),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey.shade900,
+                              hintText: "Type a message...",
+                              hintStyle: TextStyle(color: Colors.white70),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        FloatingActionButton(
+                          onPressed: sendMessage,
+                          backgroundColor: Colors.blueAccent,
+                          child: Icon(Icons.send, color: Colors.white),
+                        ),
+                      ],
+                    )),
         ],
       ),
     );

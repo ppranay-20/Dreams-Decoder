@@ -1,20 +1,10 @@
 import 'package:dreams_decoder/pages/auth/auth_wrapper.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "dotenv");
-  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: dotenv.env['FIREBASE_API_KEY'] as String,
-          authDomain: dotenv.env['AUTH_DOMAIN'] as String,
-          projectId: dotenv.env['PROJECT_ID'] as String,
-          storageBucket: dotenv.env['STORAGE_BUCKET'] as String,
-          messagingSenderId: dotenv.env['MESSAGING_SENDER_ID'] as String,
-          appId: dotenv.env['APP_ID'] as String,
-          measurementId: dotenv.env['MEASUREMENT_ID'] as String));
   runApp(const MyApp());
 }
 
