@@ -4,9 +4,7 @@ import 'package:dreams_decoder/pages/home/dream_history.dart';
 import 'package:dreams_decoder/pages/auth/signup.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,24 +68,6 @@ class _SigninState extends State<Signin> {
     }  catch (ex) {
       debugPrint("Error $ex");
       showAlertDialog("An error occured");
-    }
-  }
-
-  googleLogin() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-      final creds = GoogleAuthProvider.credential(
-          accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
-
-      await FirebaseAuth.instance.signInWithCredential(creds).then((value) => {
-            if (mounted)
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => DreamHistory()))
-          });
-    } catch (e) {
-      showAlertDialog("Google signin failed $e");
     }
   }
 
@@ -185,7 +165,7 @@ class _SigninState extends State<Signin> {
                     socialMediaButton(
                         Icons.apple, "Continue with Apple", () {}),
                     socialMediaButton(
-                        Icons.g_mobiledata, "Continue with Google", googleLogin),
+                        Icons.g_mobiledata, "Continue with Google", (){}),
                     socialMediaButton(
                         Icons.facebook, "Continue with Facebook", () {})
                   ],
