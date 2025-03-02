@@ -5,9 +5,8 @@ import 'package:dreams_decoder/pages/auth/signup.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-
 class Signin extends StatefulWidget {
   const Signin({super.key});
 
@@ -40,36 +39,36 @@ class _SigninState extends State<Signin> {
   }
 
   void login(String email, String password, BuildContext context) async {
-    if (email == "" || password == "") {
-      showErrorSnackBar(context, "Email and Password required");
-      return;
-    }
-
-    try {
-      final url = getAPIUrl('auth/login');
-      final response = await http.post(url,body: jsonEncode({
-        "email": email,
-        "password": password
-      }), headers: {
-        'Content-Type': 'application/json'
-      });
-
-      if (response.statusCode == 200) {
-        SharedPreferences pref = await SharedPreferences.getInstance();
-        final data = jsonDecode(response.body);
-        final token = data['token'];
-        pref.setString('token', token);
-        showSuccessSnackbar(context, "Login Successful");
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DreamHistory()));
-      } else {
-        showErrorSnackBar(context, "Either email or password incorrect");
-      }
-
-    }  catch (ex) {
-      debugPrint("Error $ex");
-      showAlertDialog("An error occured");
-    }
+  if (email == "" || password == "") {
+    showErrorSnackBar(context, "Email and Password required");
+    return;
   }
+
+  try {
+    final url = getAPIUrl('auth/login');
+    final response = await http.post(url,body: jsonEncode({
+      "email": email,
+      "password": password
+    }), headers: {
+      'Content-Type': 'application/json'
+    });
+
+    if (response.statusCode == 200) {
+      const storage = FlutterSecureStorage();
+      final data = jsonDecode(response.body);
+      final token = data['token'];
+      await storage.write(key: 'token', value: token);
+      showSuccessSnackbar(context, "Login Successful");
+      Navigator.push(context, MaterialPageRoute(builder: (context) => DreamHistory()));
+    } else {
+      showErrorSnackBar(context, "Either email or password incorrect");
+    }
+
+  }  catch (ex) {
+    debugPrint("Error $ex");
+    showAlertDialog("An error occured");
+  }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,7 @@ import 'package:dreams_decoder/pages/payments/upgrade.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dreams_decoder/pages/auth/signin.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -34,11 +34,10 @@ void upgradeSubscription(BuildContext context) {
 }
 
 class _ProfileState extends State<Profile> {
+final storage = const FlutterSecureStorage();
 
   signOut() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.remove('token');
-
+    await storage.delete(key: 'token');
     showSuccessSnackbar(context, "Logged out successfully");
     Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()));
   }

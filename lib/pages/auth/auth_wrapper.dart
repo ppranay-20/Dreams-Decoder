@@ -1,7 +1,7 @@
 import 'package:dreams_decoder/pages/home/dream_history.dart';
 import 'package:dreams_decoder/pages/auth/signin.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -13,6 +13,7 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   bool isLoading = true;
   bool isAuthenticated = true;
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -21,8 +22,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> checkAuthStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    String? token = await storage.read(key: 'token');
 
     setState(() {
       isAuthenticated = token != null;
