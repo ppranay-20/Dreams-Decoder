@@ -78,7 +78,7 @@ class _ChatPageState extends State<ChatPage> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final messageFromResonse = data['data'];
+        final messageFromResonse = data['aiResponse'];
         setState(() {
           messages.add(messageFromResonse);
           messageLimit--;

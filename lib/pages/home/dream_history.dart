@@ -21,6 +21,9 @@ class _DreamHistoryState extends State<DreamHistory> {
   List<dynamic> chats = [];
   DateTime? selectedDate;
   Map<DateTime, List<dynamic>> events = {};
+    DateTime? startDate;
+  DateTime? endDate;
+  bool isDateRangeFilterActive = false;
 
   @override
   void didChangeDependencies() {
@@ -28,30 +31,24 @@ class _DreamHistoryState extends State<DreamHistory> {
     getAllChats();
   }
 
-
   void getAllChats() async {
     final customerId = await getIdFromJWT();
     try {
       final url = getAPIUrl('chat/user/$customerId');
-      
-      final response = await http.get(url, headers: {
-        'Content-Type': 'application/json'
-      });
 
-      if(response.statusCode == 200) {
+      final response =
+          await http.get(url, headers: {'Content-Type': 'application/json'});
+
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-      
+
         setState(() {
           isLoading = false;
           chats = data['data'];
           events = _groupChatsByDate(chats);
-          DateTime now = DateTime.now();
-          DateTime normalizedDate = DateTime(now.year, now.month, now.day);
-          selectedDate = normalizedDate;
         });
       }
-
-    } catch(e) {
+    } catch (e) {
       debugPrint("An error occured $e");
     }
   }
@@ -68,20 +65,22 @@ class _DreamHistoryState extends State<DreamHistory> {
     };
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }, 
-        body: jsonEncode(newChatPayload)
-      );
+      final response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: jsonEncode(newChatPayload));
 
-      if(response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final chat = data['data'];
-        if(!mounted) return;
-        await Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(chat: chat),));
+        if (!mounted) return;
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatPage(chat: chat),
+            ));
         getAllChats();
       }
     } catch (err) {
@@ -92,12 +91,13 @@ class _DreamHistoryState extends State<DreamHistory> {
   Map<DateTime, List<dynamic>> _groupChatsByDate(List<dynamic> chats) {
     Map<DateTime, List<dynamic>> groupedEvents = {};
 
-    for(var chat in chats) {
+    for (var chat in chats) {
       final rawDate = chat['chat_open'];
       DateTime parsedDate = DateTime.parse(rawDate);
-      DateTime normalizedDate = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+      DateTime normalizedDate =
+          DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
 
-      if(groupedEvents.containsKey(normalizedDate)) {
+      if (groupedEvents.containsKey(normalizedDate)) {
         groupedEvents[normalizedDate]!.add(chat);
       } else {
         groupedEvents[normalizedDate] = [chat];
@@ -107,21 +107,20 @@ class _DreamHistoryState extends State<DreamHistory> {
     return groupedEvents;
   }
 
-  void navigateToChat(Map<String,dynamic> chat) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ChatPage(chat: chat))
-      );
+  void navigateToChat(Map<String, dynamic> chat) async {
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ChatPage(chat: chat)));
 
-      getAllChats();
-    }
+    getAllChats();
+  }
 
   Widget _buildDreamCard(dynamic chat) {
     final String rawDate = chat['chat_open'];
     DateTime parsedDate = DateTime.parse(rawDate);
     final String date = DateFormat('d MMM yyyy').format(parsedDate);
     final messages = chat['messages'] ?? [];
-    final String firstMessage = messages.isNotEmpty ?  messages[0]['content'] : "No messages";
+    final String firstMessage =
+        messages.isNotEmpty ? messages[0]['content'] : "No messages";
 
     return GestureDetector(
       onTap: () => navigateToChat(chat),
@@ -154,15 +153,62 @@ class _DreamHistoryState extends State<DreamHistory> {
   }
 
   void onDateSelected(DateTime date) {
-  // Normalize the date by removing time components
-  DateTime normalizedDate = DateTime(date.year, date.month, date.day);
-  
-  setState(() {
-    selectedDate = normalizedDate;
-  });
+    // Normalize the date by removing time components
+    DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+
+    setState(() {
+      selectedDate = normalizedDate;
+            isDateRangeFilterActive = false;
+      startDate = null;
+      endDate = null;
+    });
+  }
+
+  void clearDateSelected() {
+    setState(() {
+      selectedDate = null;
+      isDateRangeFilterActive = false;
+      startDate = null;
+      endDate = null;
+    });
+  }
+
+     void onDateRangeSelected(DateTime start, DateTime end) {
+    setState(() {
+      // Normalize the dates by removing time components
+      startDate = DateTime(start.year, start.month, start.day);
+      endDate = DateTime(end.year, end.month, end.day);
+      isDateRangeFilterActive = true;
+      // Reset single date selection
+      selectedDate = null;
+    });
+    
+    // Debug log to verify dates
+    debugPrint("Date range filter active: ${startDate!.toString()} to ${endDate!.toString()}");
+  }
+
+   List<dynamic> getFilteredChats() {
+  if (selectedDate != null) {
+    return events[selectedDate] ?? [];
+  } else if (isDateRangeFilterActive && startDate != null && endDate != null) {
+    return chats.where((chat) {
+      final rawDate = chat['chat_open'];
+      DateTime parsedDate = DateTime.parse(rawDate);
+      DateTime normalizedDate = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+      
+      // Ensure the selected range is correctly applied
+      return normalizedDate.isAtSameMomentAs(startDate!) ||
+             (normalizedDate.isAfter(startDate!) && normalizedDate.isBefore(endDate!)) ||
+             normalizedDate.isAtSameMomentAs(endDate!);
+    }).toList();
+  } else {
+    return chats;
+  }
 }
+
   @override
   Widget build(BuildContext context) {
+    final filteredChats = getFilteredChats();
     return Scaffold(
       body: Container(
         color: Colors.black,
@@ -197,28 +243,36 @@ class _DreamHistoryState extends State<DreamHistory> {
                 ),
 
                 SizedBox(
-                  height: 320,
-                    child: DreamsTable(events: events, onDateSelected: onDateSelected),
+                  height: 365,
+                  child: DreamsTable(
+                      events: events, onDateSelected: onDateSelected, clearDateSelected: clearDateSelected, onDateRangeSelected: onDateRangeSelected,),
                 ),
-                
-                
+
                 SizedBox(height: 20),
+
                 /// Fetch and Display Dream List
-                Expanded(
-                  child: isLoading ? 
-                     Center(
-                      child: CircularProgressIndicator(),
-                     ) : 
-                     selectedDate != null && events[selectedDate] != null
-                  ? ListView.builder(
-                    itemCount: events[selectedDate]!.length,
-                    itemBuilder: (context, index) {
-                      final chat = events[selectedDate]![index];
-                      return _buildDreamCard(chat);
-                    },
-                  ) : Center(
-                     child: Text("No Chats for this date", style: TextStyle(color: Colors.white70)),
-                  )
+               Expanded(
+                  child: isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : filteredChats.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: filteredChats.length,
+                          itemBuilder: (context, index) {
+                            final chat = filteredChats[index];
+                            return _buildDreamCard(chat);
+                          })
+                      : Center(
+                          child: Text(
+                            isDateRangeFilterActive 
+                              ? "No dreams found within the selected date range" 
+                              : selectedDate != null 
+                                ? "No dreams for this date"
+                                : "No dreams found",
+                            style: TextStyle(color: Colors.white70)
+                          ),
+                        )
                 ),
               ],
             ),

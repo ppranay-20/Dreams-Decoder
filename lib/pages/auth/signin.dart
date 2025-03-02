@@ -63,11 +63,13 @@ class _SigninState extends State<Signin> {
         pref.setString('token', token);
         showSuccessSnackbar(context, "Login Successful");
         Navigator.push(context, MaterialPageRoute(builder: (context) => DreamHistory()));
+      } else {
+        showErrorSnackBar(context, "Either email or password incorrect");
       }
 
-    } on FirebaseAuthException catch (ex) {
+    }  catch (ex) {
       debugPrint("Error $ex");
-      showAlertDialog(ex.code.toString());
+      showAlertDialog("An error occured");
     }
   }
 

@@ -50,7 +50,10 @@ class _SignupState extends State<Signup> {
     } else if (password != confirmPassword) {
       showErrorSnackBar(context,"Passwords do not match!");
       return;
-    } else {
+    } else if (password.length < 6) {
+      showErrorSnackBar(context, "Password must be greater than 6 characters");
+    }
+    else {
       try {
         final url = getAPIUrl('auth/register');
         final response = await http.post(url,
