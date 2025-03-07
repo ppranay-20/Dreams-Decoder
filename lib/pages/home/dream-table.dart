@@ -5,7 +5,6 @@ class DreamsTable extends StatefulWidget {
   final Map<DateTime, List<dynamic>> events;
   final Function(DateTime) onDateSelected;
   final Function clearDateSelected;
-  // New properties for date range filter
   final Function(DateTime, DateTime)? onDateRangeSelected;
 
   const DreamsTable({
@@ -21,69 +20,14 @@ class DreamsTable extends StatefulWidget {
 }
 
 class _DreamsTableState extends State<DreamsTable> {
-  DateTime? _focusedDate;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
   
-  // Date range filter variables
-  DateTime? _startDate;
-  DateTime? _endDate;
-  bool _isRangeFilterActive = false;
-
-  void _onDaySelected(DateTime day, DateTime focusedDay) {
-    setState(() {
-      _focusedDate = day;
-      
-      // Reset range filter when single date is selected
-      if (_isRangeFilterActive) {
-        _isRangeFilterActive = false;
-        _startDate = null;
-        _endDate = null;
-      }
-    });
-    widget.onDateSelected(day);
-  }
-
-  void _openDateRangePicker() async {
-    final initialDateRange = DateTimeRange(
-      start: _startDate ?? DateTime.now().subtract(const Duration(days: 7)),
-      end: _endDate ?? DateTime.now(),
-    );
-
-    final pickedDateRange = await showDateRangePicker(
-      context: context,
-      initialDateRange: initialDateRange,
-      firstDate: DateTime(2010),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: Colors.blue[300]!,
-              onPrimary: Colors.black,
-              surface: Colors.grey[900]!,
-              onSurface: Colors.white,
-            ),
-            dialogBackgroundColor: Colors.grey[800],
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedDateRange != null) {
-      setState(() {
-        _startDate = pickedDateRange.start;
-        _endDate = pickedDateRange.end;
-        _isRangeFilterActive = true;
-        _focusedDate = null; // Reset single date selection
-      });
-      
-      if (widget.onDateRangeSelected != null) {
-        widget.onDateRangeSelected!(_startDate!, _endDate!);
-      }
-    }
-  }
-
+  // Date range selection variables
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+  bool _isRangeSelectionMode = false;
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -91,17 +35,77 @@ class _DreamsTableState extends State<DreamsTable> {
         TableCalendar(
           firstDay: DateTime.utc(2010, 10, 16),
           lastDay: DateTime.utc(2030, 3, 14),
-          focusedDay: _focusedDate ?? DateTime.now(),
-          calendarFormat: _calendarFormat,
+          focusedDay: _focusedDay,
+          calendarFormat: CalendarFormat.month,
           rowHeight: 40,
-          onFormatChanged: (format) {
+          
+          // Enable range selection
+          rangeStartDay: _rangeStart,
+          rangeEndDay: _rangeEnd,
+          rangeSelectionMode: _isRangeSelectionMode 
+              ? RangeSelectionMode.enforced 
+              : RangeSelectionMode.disabled,
+          
+          // Handle day selection
+          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+          onDaySelected: (selectedDay, focusedDay) {
             setState(() {
-              _calendarFormat = format;
+              if (_isRangeSelectionMode) {
+                // If already in range selection mode, handle it differently
+                if (_rangeStart == null) {
+                  _rangeStart = selectedDay;
+                } else if (_rangeEnd == null) {
+                  // Ensure end date is after start date
+                  if (selectedDay.isBefore(_rangeStart!)) {
+                    _rangeEnd = _rangeStart;
+                    _rangeStart = selectedDay;
+                  } else {
+                    _rangeEnd = selectedDay;
+                  }
+                  
+                  // Complete range selection and notify parent
+                  if (_rangeStart != null && _rangeEnd != null && widget.onDateRangeSelected != null) {
+                    widget.onDateRangeSelected!(_rangeStart!, _rangeEnd!);
+                  }
+                } else {
+                  // If both start and end are already set, start a new range
+                  _rangeStart = selectedDay;
+                  _rangeEnd = null;
+                }
+              } else {
+                // Regular single date selection
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+                _rangeStart = null;
+                _rangeEnd = null;
+                widget.onDateSelected(selectedDay);
+              }
             });
           },
+          
+          // Highlight the range
+          onRangeSelected: (start, end, focusedDay) {
+            setState(() {
+              _focusedDay = focusedDay;
+              _rangeStart = start;
+              _rangeEnd = end;
+              _selectedDay = null; // Clear single day selection
+              
+              if (start != null && end != null && widget.onDateRangeSelected != null) {
+                widget.onDateRangeSelected!(start, end);
+              }
+            });
+          },
+          
+          onPageChanged: (focusedDay) {
+            setState(() {
+              _focusedDay = focusedDay;
+            });
+          },
+          
           headerStyle: HeaderStyle(
             titleTextStyle: TextStyle(
-              color: Colors.white, // Header month/year text color
+              color: Colors.white,
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
@@ -110,7 +114,7 @@ class _DreamsTableState extends State<DreamsTable> {
             formatButtonVisible: false,
             titleCentered: true
           ),
-          selectedDayPredicate: (day) => isSameDay(day, _focusedDate),
+          
           calendarStyle: CalendarStyle(
             weekendTextStyle: TextStyle(color: Colors.white70),
             defaultTextStyle: TextStyle(color: Colors.white),
@@ -125,30 +129,52 @@ class _DreamsTableState extends State<DreamsTable> {
               color: Colors.blue[300],
               shape: BoxShape.circle,
             ),
-            // Highlight dates in the selected range
+            rangeStartTextStyle: TextStyle(color: Colors.black),
+            rangeStartDecoration: BoxDecoration(
+              color: Colors.blue[300],
+              shape: BoxShape.circle,
+            ),
+            rangeEndTextStyle: TextStyle(color: Colors.black),
+            rangeEndDecoration: BoxDecoration(
+              color: Colors.blue[300],
+              shape: BoxShape.circle,
+            ),
+            withinRangeTextStyle: TextStyle(color: Colors.white),
+            withinRangeDecoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.4),
+              shape: BoxShape.circle,
+            ),
             markersMaxCount: 3,
+            markerDecoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
           ),
+          
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             weekendStyle: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
           ),
-          onDaySelected: _onDaySelected,
+          
           eventLoader: (day) {
             DateTime normalizedDay = DateTime(day.year, day.month, day.day);
             return widget.events[normalizedDay] ?? [];
           },
         ),
+        
+        SizedBox(height: 8),
+        
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_focusedDate != null || _isRangeFilterActive)
+            if (_selectedDay != null || _rangeStart != null || _rangeEnd != null)
               TextButton(
                 onPressed: () {
                   setState(() {
-                    _focusedDate = null;
-                    _isRangeFilterActive = false;
-                    _startDate = null;
-                    _endDate = null;
+                    _selectedDay = null;
+                    _rangeStart = null;
+                    _rangeEnd = null;
+                    _isRangeSelectionMode = false;
                     widget.clearDateSelected();
                   });
                 }, 
@@ -158,20 +184,44 @@ class _DreamsTableState extends State<DreamsTable> {
                 )
               ),
             SizedBox(width: 10),
+            // Toggle between single date and range selection
             TextButton.icon(
-              onPressed: _openDateRangePicker,
-              icon: Icon(Icons.date_range, color: Colors.white, size: 14),
+              onPressed: () {
+                setState(() {
+                  _isRangeSelectionMode = !_isRangeSelectionMode;
+                  _selectedDay = null;
+                  _rangeStart = null;
+                  _rangeEnd = null;
+                  widget.clearDateSelected();
+                });
+              },
+              icon: Icon(
+                _isRangeSelectionMode ? Icons.calendar_today : Icons.date_range, 
+                color: Colors.white, 
+                size: 14
+              ),
               label: Text(
-                _isRangeFilterActive 
-                    ? "${_startDate!.day}/${_startDate!.month} - ${_endDate!.day}/${_endDate!.month}" 
-                    : "Date Range",
+                _isRangeSelectionMode 
+                    ? "Single Date Mode" 
+                    : "Date Range Mode",
                 style: TextStyle(fontSize: 10, color: Colors.white),
               ),
               style: TextButton.styleFrom(
-                backgroundColor: Colors.blue[900],
+                backgroundColor: _isRangeSelectionMode ? Colors.green[800] : Colors.blue[900],
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
             ),
+            
+            if (_isRangeSelectionMode && _rangeStart != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  _rangeEnd != null
+                      ? "${_rangeStart!.day}/${_rangeStart!.month} - ${_rangeEnd!.day}/${_rangeEnd!.month}"
+                      : "Select end date",
+                  style: TextStyle(fontSize: 10, color: Colors.white70),
+                ),
+              ),
           ],
         ),
       ],

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dreams_decoder/pages/auth/signin.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
+import 'package:dreams_decoder/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,6 +19,7 @@ class _SignupState extends State<Signup> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void showAlertDialog(String message) {
     showDialog(
@@ -41,19 +43,6 @@ class _SignupState extends State<Signup> {
 
   void signUp(String username, String email, String password,
       String confirmPassword, BuildContext context) async {
-    if (username == "" ||
-        email == "" ||
-        password == "" ||
-        confirmPassword == "") {
-      showErrorSnackBar(context, "All fields are required");
-      return;
-    } else if (password != confirmPassword) {
-      showErrorSnackBar(context,"Passwords do not match!");
-      return;
-    } else if (password.length < 6) {
-      showErrorSnackBar(context, "Password must be greater than 6 characters");
-    }
-    else {
       try {
         final url = getAPIUrl('auth/register');
         final response = await http.post(url,
@@ -62,8 +51,9 @@ class _SignupState extends State<Signup> {
                 {'name': username, 'email': email, 'password': password}));
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          showSuccessSnackbar(context,"Signup successful!");
-          Navigator.push(context, MaterialPageRoute(builder: (context) => Signin()));
+          showSuccessSnackbar(context, "Signup successful!");
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Signin()));
         } else {
           debugPrint("Error: ${response.statusCode} - ${response.body}");
           showAlertDialog("Signup failed: ${response.body}");
@@ -72,117 +62,236 @@ class _SignupState extends State<Signup> {
         showAlertDialog(e.toString());
       }
     }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-            width: double.infinity,
-            color: Colors.black,
-            child: Center(
-              child: Container(
-                width: 350,
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.white, width: 1.5)),
+      backgroundColor: Colors.black,
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    Text(
+                      "Sign up",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
+                    ),
+                    SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "To start decoding and expanding your dreams you need to create an account",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20),
-                    Text("Username",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                    TextField(
+                    TextFormField(
                       controller: usernameController,
-                      decoration: InputDecoration(
-                        hintText: "Enter Username",
-                        prefixIcon: Icon(Icons.person, color: Colors.white),
-                      ),
                       style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                          hintText: "Enter your name",
+                          labelText: "Name",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          hintStyle: TextStyle(color: Colors.grey)),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter your name";
+                        }
+                
+                        return null;
+                      },
                     ),
-                    SizedBox(height: 15),
-                    Text("Email",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                    TextField(
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
                       controller: emailController,
-                      decoration: InputDecoration(
-                        hintText: "Enter Email",
-                        prefixIcon: Icon(Icons.email, color: Colors.white),
-                      ),
                       style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                          hintText: "Enter your email",
+                          labelText: "Email",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          hintStyle: TextStyle(color: Colors.grey)),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter your email";
+                        }
+                
+                        return null;
+                      },
                     ),
-                    SizedBox(height: 15),
-                    Text("Password",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                    TextField(
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
                       controller: passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: "Enter Password",
-                        prefixIcon: Icon(Icons.lock, color: Colors.white),
-                      ),
                       style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                          hintText: "Enter your Password",
+                          labelText: "Password",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          hintStyle: TextStyle(color: Colors.grey)),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter you password";
+                        } else if (value.length < 6) {
+                          return "Password should be of 6 characters";
+                        }
+                
+                        return null;
+                      },
                     ),
-                    SizedBox(height: 15),
-                    Text("Confirm Password",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                    TextField(
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
                       controller: confirmPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: "Confirm Password",
-                        prefixIcon: Icon(Icons.lock, color: Colors.white),
-                      ),
                       style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                          hintText: "Confirm Password",
+                          labelText: "Confirm Password",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          hintStyle: TextStyle(color: Colors.grey)),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                            return "Please confirm your password";
+                          } else if (value != passwordController.text) {
+                            return "Passwords do not match";
+                          }
+                
+                        return null;
+                      },
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        signUp(
-                            usernameController.text.toString(),
-                            emailController.text.toString(),
-                            passwordController.text.toString(),
-                            confirmPasswordController.text.toString(),
-                            context);
-                      },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          minimumSize: Size(double.infinity, 45),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8))),
-                      child: Text("Sign Up"),
-                    ),
-                    SizedBox(height: 10),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Signin()));
-                        },
+                        backgroundColor: Colors.blueAccent,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () {
+                        if(_formKey.currentState!.validate()) {
+                          signUp(usernameController.text, emailController.text, passwordController.text, confirmPasswordController.text, context);
+                        }
+                      }, // Handle login
+                      child: Center(
                         child: Text(
-                          "Already have an account? Login Now!",
-                          style: TextStyle(color: Colors.blueAccent),
+                          "Sign up",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.white54)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            "or",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.white54)),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Button(
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.g_mobiledata_outlined,
+                                size: 30,
+                              ),
+                              Text(
+                                "Sign in With Google",
+                                style:
+                                    TextStyle(color: Colors.black, fontSize: 15),
+                              )
+                            ],
+                          ),
+                        ),
+                        onPressed: () {}),
+                    SizedBox(height: 10),
+                    Button(
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.apple,
+                                size: 24,
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Text(
+                                "Sign in With Apple",
+                                style:
+                                    TextStyle(color: Colors.black, fontSize: 15),
+                              )
+                            ],
+                          ),
+                        ),
+                        onPressed: () {}),
                   ],
                 ),
               ),
-            )));
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Already have an account?",
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Signin()));
+                      },
+                      child: Text(
+                        "Signin",
+                        style: TextStyle(color: Colors.blue, fontSize: 16),
+                      ))
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

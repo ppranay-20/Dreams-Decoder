@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 import 'package:dreams_decoder/pages/home/dream-table.dart';
+import 'package:dreams_decoder/pages/profile/profile.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/getIdFromJWT.dart';
 import 'package:dreams_decoder/pages/chat/chat.dart';
-import 'package:dreams_decoder/pages/profile/profile.dart';
+import 'package:dreams_decoder/utils/getUserData.dart';
+import 'package:dreams_decoder/widgets/dreams-card.dart';
+import 'package:dreams_decoder/widgets/updgrade-subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 class DreamHistory extends StatefulWidget {
   const DreamHistory({super.key});
@@ -21,14 +23,17 @@ class _DreamHistoryState extends State<DreamHistory> {
   List<dynamic> chats = [];
   DateTime? selectedDate;
   Map<DateTime, List<dynamic>> events = {};
-    DateTime? startDate;
+  DateTime? startDate;
   DateTime? endDate;
   bool isDateRangeFilterActive = false;
+  double profileCompletion = 0.0;
+  int? messageLimit;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     getAllChats();
+    getProfileCompletion();
   }
 
   void getAllChats() async {
@@ -41,11 +46,17 @@ class _DreamHistoryState extends State<DreamHistory> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+         List<dynamic> sortedChats = List.from(data['data']);
+      sortedChats.sort((a, b) {
+        DateTime dateA = DateTime.parse(a['created_at']);
+        DateTime dateB = DateTime.parse(b['created_at']);
+        return dateB.compareTo(dateA);
+      });
 
         setState(() {
           isLoading = false;
-          chats = data['data'];
-          events = _groupChatsByDate(chats);
+          chats = sortedChats;
+          events = _groupChatsByDate(sortedChats);
         });
       }
     } catch (e) {
@@ -114,51 +125,13 @@ class _DreamHistoryState extends State<DreamHistory> {
     getAllChats();
   }
 
-  Widget _buildDreamCard(dynamic chat) {
-    final String rawDate = chat['chat_open'];
-    DateTime parsedDate = DateTime.parse(rawDate);
-    final String date = DateFormat('d MMM yyyy').format(parsedDate);
-    final messages = chat['messages'] ?? [];
-    final String firstMessage =
-        messages.isNotEmpty ? messages[0]['content'] : "No messages";
-
-    return GestureDetector(
-      onTap: () => navigateToChat(chat),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 15),
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(date, style: TextStyle(color: Colors.white70, fontSize: 14)),
-            SizedBox(height: 5),
-            Text(
-              firstMessage,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void onDateSelected(DateTime date) {
     // Normalize the date by removing time components
     DateTime normalizedDate = DateTime(date.year, date.month, date.day);
 
     setState(() {
       selectedDate = normalizedDate;
-            isDateRangeFilterActive = false;
+      isDateRangeFilterActive = false;
       startDate = null;
       endDate = null;
     });
@@ -173,7 +146,7 @@ class _DreamHistoryState extends State<DreamHistory> {
     });
   }
 
-     void onDateRangeSelected(DateTime start, DateTime end) {
+  void onDateRangeSelected(DateTime start, DateTime end) {
     setState(() {
       // Normalize the dates by removing time components
       startDate = DateTime(start.year, start.month, start.day);
@@ -182,29 +155,62 @@ class _DreamHistoryState extends State<DreamHistory> {
       // Reset single date selection
       selectedDate = null;
     });
-    
+
     // Debug log to verify dates
-    debugPrint("Date range filter active: ${startDate!.toString()} to ${endDate!.toString()}");
+    debugPrint(
+        "Date range filter active: ${startDate!.toString()} to ${endDate!.toString()}");
   }
 
-   List<dynamic> getFilteredChats() {
-  if (selectedDate != null) {
-    return events[selectedDate] ?? [];
-  } else if (isDateRangeFilterActive && startDate != null && endDate != null) {
-    return chats.where((chat) {
-      final rawDate = chat['chat_open'];
-      DateTime parsedDate = DateTime.parse(rawDate);
-      DateTime normalizedDate = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-      
-      // Ensure the selected range is correctly applied
-      return normalizedDate.isAtSameMomentAs(startDate!) ||
-             (normalizedDate.isAfter(startDate!) && normalizedDate.isBefore(endDate!)) ||
-             normalizedDate.isAtSameMomentAs(endDate!);
-    }).toList();
-  } else {
-    return chats;
+  List<dynamic> getFilteredChats() {
+    if (selectedDate != null) {
+      return events[selectedDate] ?? [];
+    } else if (isDateRangeFilterActive &&
+        startDate != null &&
+        endDate != null) {
+      return chats.where((chat) {
+        final rawDate = chat['chat_open'];
+        DateTime parsedDate = DateTime.parse(rawDate);
+        DateTime normalizedDate =
+            DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+
+        // Ensure the selected range is correctly applied
+        return normalizedDate.isAtSameMomentAs(startDate!) ||
+            (normalizedDate.isAfter(startDate!) &&
+                normalizedDate.isBefore(endDate!)) ||
+            normalizedDate.isAtSameMomentAs(endDate!);
+      }).toList();
+    } else {
+      return chats;
+    }
   }
-}
+
+  Future<void> getProfileCompletion() async {
+    try {
+      final userData = await getUserData();
+      setState(() {
+        profileCompletion = calculateProfileCompletion(userData);
+        messageLimit = userData['message_limit'];
+      });
+    } catch (e) {
+      debugPrint("Error fetching profile: $e");
+    }
+  }
+
+  double calculateProfileCompletion(Map<String, dynamic> profile) {
+    int totalFields = 5;
+    int filledFields = 0;
+
+    if (profile['name'] != null && profile['name'].isNotEmpty) filledFields++;
+    if (profile['age'] != null) filledFields++;
+    if (profile['gender'] != null && profile['gender'].isNotEmpty)
+      filledFields++;
+    if (profile['occupation'] != null && profile['occupation'].isNotEmpty)
+      filledFields++;
+    if (profile['cultural_group'] != null &&
+        profile['cultural_group'].isNotEmpty) filledFields++;
+
+    return filledFields / totalFields;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,78 +220,173 @@ class _DreamHistoryState extends State<DreamHistory> {
         color: Colors.black,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                /// Header Row (Title + Profile Icon)
+                SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Dream History",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Image.network(
+                      "https://s3-alpha-sig.figma.com/img/add9/4065/46d082f4367c08f6cb77204e0e16b900?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=CDiP-4M6iPbRRiU0nm5VK3h0VHMWU42HKbfbExcR4P1HC9R886DQpl1rEdTV5oe3~81dgr2V-z2szRPIztQSHZ09C7LWSNR7yBwK9exDCd6UvIeivxXQk-grUZAzptU6LOjZlWxuRHV8KOo7MGj9unJAbZY7586gjD6xQ8NLWoxL1MApn7QQq7PgikbeQ0nypgSCwOQOWfZpXZzbL7PKf4dzbgW7KbsIgeIa4Xw3nh49siXKZPYmYMSKUsTdC7gbF3WNfhIh3Bf5zsx7AWgXWz4jLuAkMa-LB9PoBsYaeIFGU98xoC1kJqqyj8DX4PveGMfhJsGt-NwM61qY8Uqdkw__",
+                      fit: BoxFit.contain,
+                      height: 50,
+                      width: 200,
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Profile()),
-                        );
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Profile()));
                       },
-                      child: Icon(Icons.account_circle,
-                          color: Colors.white, size: 30),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(30),
+                            color: Colors.white),
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.person, // Profile icon
+                            color: Colors.black,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(
+                            12), // Add some padding for better appearance
+                        decoration: BoxDecoration(
+                          color: Colors.white12, // Semi-transparent background
+                          borderRadius: BorderRadius.circular(
+                              10), // Optional rounded corners
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "Messages left: $messageLimit",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10),
+                              ),
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              "It looks like you're nearing the end\nof your free monthly dream credits.",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            GestureDetector(
+                              onTap: () {
+                                showPaymentDialog(context);
+                              },
+                              child: Text(
+                                "Click here to top-up your plan",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black,
+                      ),
+                      child: Image.asset(
+                        'assets/murka.png',
+                      ),
                     ),
                   ],
                 ),
 
                 SizedBox(
-                  height: 365,
                   child: DreamsTable(
-                      events: events, onDateSelected: onDateSelected, clearDateSelected: clearDateSelected, onDateRangeSelected: onDateRangeSelected,),
+                    events: events,
+                    onDateSelected: onDateSelected,
+                    clearDateSelected: clearDateSelected,
+                    onDateRangeSelected: onDateRangeSelected,
+                  ),
                 ),
 
                 SizedBox(height: 20),
 
                 /// Fetch and Display Dream List
-               Expanded(
-                  child: isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : filteredChats.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: filteredChats.length,
-                          itemBuilder: (context, index) {
-                            final chat = filteredChats[index];
-                            return _buildDreamCard(chat);
-                          })
-                      : Center(
-                          child: Text(
-                            isDateRangeFilterActive 
-                              ? "No dreams found within the selected date range" 
-                              : selectedDate != null 
-                                ? "No dreams for this date"
-                                : "No dreams found",
-                            style: TextStyle(color: Colors.white70)
-                          ),
-                        )
-                ),
+                Expanded(
+                    child: isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : filteredChats.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: filteredChats.length,
+                                itemBuilder: (context, index) {
+                                  final chat = filteredChats[index];
+                                  return DreamCard(
+                                      chat: chat,
+                                      navigateToChat: navigateToChat);
+                                })
+                            : Center(
+                                child: Text(
+                                    isDateRangeFilterActive
+                                        ? "No dreams found within the selected date range"
+                                        : selectedDate != null
+                                            ? "No dreams for this date"
+                                            : "No dreams found",
+                                    style: TextStyle(color: Colors.white70)),
+                              )),
               ],
             ),
           ),
         ),
       ),
-
-      /// Floating Button (+) to Add a New Dream
       floatingActionButton: FloatingActionButton(
-        onPressed: createNewChat,
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        child: Icon(Icons.add, color: Colors.black, size: 30),
+        onPressed: () => createNewChat(),
+        backgroundColor: Colors
+            .transparent, // Make FAB transparent to show our custom DecoratedBox
+        elevation: 0, // Optional: remove shadow
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle, // This will make it a perfect circle
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(8), // Add padding inside the circle
+            child: Icon(
+              Icons.add,
+              size: 20,
+              color: Colors.black, // Icon color
+            ),
+          ),
+        ),
       ),
     );
   }

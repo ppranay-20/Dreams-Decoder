@@ -23,7 +23,6 @@ class _ChatPageState extends State<ChatPage> {
   late int messageLimit = 0;
   late int charaterLimit = 0;
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -71,7 +70,7 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       final url = getAPIUrl('message');
-      
+
       final response = await http.post(url,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(messagePayload));
@@ -113,8 +112,8 @@ class _ChatPageState extends State<ChatPage> {
                     final chatId = widget.chat['id'];
                     final url = getAPIUrl('chat/end-chat/$chatId');
 
-                    final response =
-                        await http.put(url, body: jsonEncode({"status": "closed"}));
+                    final response = await http.put(url,
+                        body: jsonEncode({"status": "closed"}));
 
                     if (response.statusCode == 200) {
                       final data = jsonDecode(response.body);
@@ -149,7 +148,7 @@ class _ChatPageState extends State<ChatPage> {
             Navigator.pop(context);
           },
         ),
-        title: Text("Dream Decoder", style: TextStyle(color: Colors.white)),
+        title: Text("Murka Chat", style: TextStyle(color: Colors.white)),
         centerTitle: true,
         actions: [
           status
@@ -170,11 +169,11 @@ class _ChatPageState extends State<ChatPage> {
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
             child: Column(
               children: [
                 Text(
-                  "Welcome to Dream Decoder, let's get to decoding your dreams!",
+                  "Welcome to Murkaverse, let's get to decoding your dreams!",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70),
                 ),
@@ -202,25 +201,52 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 5),
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 bool isUser = messages[index]["sent_by"] == "user";
                 return Align(
                   alignment:
                       isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 5),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.blueAccent : Colors.grey.shade800,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Text(
-                      messages[index]["content"]!,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                  child: Row(
+                      mainAxisAlignment: isUser
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!isUser)
+                          Container(
+                            margin: EdgeInsets.only(right: 8, top: 5),
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.purple.shade700,
+                              image: DecorationImage(
+                                image: AssetImage('assets/murka.png'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          padding: EdgeInsets.all(12),
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width *
+                                0.7, // Limit bubble width
+                          ),
+                          decoration: BoxDecoration(
+                            color: isUser
+                                ? Colors.blueAccent
+                                : Colors.grey.shade800,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            messages[index]["content"]!,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ]),
                 );
               },
             ),
@@ -231,7 +257,7 @@ class _ChatPageState extends State<ChatPage> {
               child: CircularProgressIndicator(color: Colors.blueAccent),
             ),
           Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(8),
               child: !status
                   ? Center(
                       child: Text(
