@@ -272,21 +272,47 @@ class _DreamHistoryState extends State<DreamHistory> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "Messages left: $messageLimit",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10),
-                              ),
-                            ),
+                              Row(children: [
+                                Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  "Messages left: $messageLimit",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                ),
+                                SizedBox(width: 10,),
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(),
+                                    color: Colors.white30,
+                                    borderRadius: BorderRadius.circular(15)
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () => createNewChat(),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.add, color: Colors.white,),
+                                          SizedBox(width: 5,),
+                                          Text("Add a Dream", style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white
+                                          ),)
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],),
                             SizedBox(height: 12),
                             Text(
                               "It looks like you're nearing the end\nof your free monthly dream credits.",
@@ -364,26 +390,6 @@ class _DreamHistoryState extends State<DreamHistory> {
                                     style: TextStyle(color: Colors.white70)),
                               )),
               ],
-            ),
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => createNewChat(),
-        backgroundColor: Colors
-            .transparent, // Make FAB transparent to show our custom DecoratedBox
-        elevation: 0, // Optional: remove shadow
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle, // This will make it a perfect circle
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(8), // Add padding inside the circle
-            child: Icon(
-              Icons.add,
-              size: 20,
-              color: Colors.black, // Icon color
             ),
           ),
         ),

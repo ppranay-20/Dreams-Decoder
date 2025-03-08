@@ -26,6 +26,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
   bool isLoading = true;
   List<dynamic> paymentPlans = [];
   dynamic selectedPlan;
+  int? amount;
 
   @override
   void initState() {
@@ -163,6 +164,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                         onPressed: () {
                           setState(() {
                             selectedPlan = plan;
+                            amount = plan['amount'];
                           });
                         },
                         child: Text(
@@ -177,9 +179,9 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
                 SizedBox(height: 10),
                 Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                  "Amount: ${amount ?? "Select a plan"}",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 15, color: Colors.grey),
                 ),
                 SizedBox(height: 15),
                 ElevatedButton(

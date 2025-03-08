@@ -142,11 +142,25 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        leading: Container(
+          margin:EdgeInsets.only(left: 10, top: 10, bottom: 10),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
         title: Text("Murka Chat", style: TextStyle(color: Colors.white)),
         centerTitle: true,

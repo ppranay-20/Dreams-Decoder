@@ -78,168 +78,168 @@ class _SigninState extends State<Signin> {
       backgroundColor: Colors.black,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 40,),
-                Text(
-                  "Sign in",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-            
-                SizedBox(height: 2),
-                Row(children: [
+        child: SingleChildScrollView(
+          child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40,),
                   Text(
-                    "Glad to see you again!",
-                    style: TextStyle(color: Colors.white70),
+                    "Sign in",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                  SizedBox(width: 10,),
-                ],),
+              
+                  SizedBox(height: 2),
+                  Row(children: [
+                    Text(
+                      "Glad to see you again!",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    SizedBox(width: 10,),
+                  ],),
+              
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: emailController,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Enter your email",
+                      labelText: "Email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      hintStyle: TextStyle(
+                        color: Colors.grey
+                      )
+                    ),
+                    validator: (String? value) {
+                      if(value == null || value.isEmpty) {
+                        return "Please enter you email";
+                      }
             
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: emailController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Enter your email",
-                    labelText: "Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    hintStyle: TextStyle(
-                      color: Colors.grey
-                    )
+                      return null;
+                    },
                   ),
-                  validator: (String? value) {
-                    if(value == null || value.isEmpty) {
-                      return "Please enter you email";
-                    }
-          
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: true,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Enter your Password",
-                    labelText: "Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)
+                  SizedBox(height: 10),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Enter your Password",
+                      labelText: "Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      hintStyle: TextStyle(
+                        color: Colors.grey
+                      ),
                     ),
-                    hintStyle: TextStyle(
-                      color: Colors.grey
-                    ),
-                  ),
-                  validator: (String? value) {
-                    if(value == null || value.isEmpty) {
-                      return "Please enter your password";
-                    } 
-                    else if(value.length < 6) {
-                      return "Please enter a valid password";
-                    }
-          
-                    return null;
-                  },
-                ),
-          
-                TextButton(
-                  onPressed: () {}, // Forgot password action
-                  child: Text(
-                    "Forgot password?",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-                SizedBox(height: 20),
+                    validator: (String? value) {
+                      if(value == null || value.isEmpty) {
+                        return "Please enter your password";
+                      } 
+                      else if(value.length < 6) {
+                        return "Please enter a valid password";
+                      }
             
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
+                      return null;
+                    },
                   ),
-                  onPressed: () {
-                    if(_formKey.currentState!.validate()) {
-                      login(emailController.text, passwordController.text, context);
-                    }
-                  }, // Handle login
-                  child: Center(
+            
+                  TextButton(
+                    onPressed: () {}, // Forgot password action
                     child: Text(
-                      "Submit",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                      "Forgot password?",
+                      style: TextStyle(color: Colors.white70),
                     ),
                   ),
-                ),
-            
-                SizedBox(height: 20,),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.white54)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                  SizedBox(height: 20),
+              
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    onPressed: () {
+                      if(_formKey.currentState!.validate()) {
+                        login(emailController.text, passwordController.text, context);
+                      }
+                    }, // Handle login
+                    child: Center(
                       child: Text(
-                        "or",
-                        style: TextStyle(color: Colors.white70),
+                        "Submit",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.white54)),
-                  ],
-                ),
+                  ),
+              
+                  SizedBox(height: 20,),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: Colors.white54)),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          "or",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.white54)),
+                    ],
+                  ),
+              
+                  SizedBox(height: 20),
+                  Button(child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.g_mobiledata_outlined, size: 30,),
+                        Text("Sign in With Google", style: TextStyle(color: Colors.black, fontSize: 15),)
+                      ],
+                    ),
+                  ), onPressed: (){}),
+                  SizedBox(height: 10),
+                  Button(child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.apple, size: 24,),
+                        SizedBox(width: 4,),
+                        Text("Sign in With Apple", style: TextStyle(color: Colors.black, fontSize: 15),)
+                      ],
+                    ),
+                  ), onPressed: (){}),
+                  SizedBox(height: 20),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Don't have an account?", style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16
+                      ),),
             
-                SizedBox(height: 20),
-                Button(child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.g_mobiledata_outlined, size: 30,),
-                      Text("Sign in With Google", style: TextStyle(color: Colors.black, fontSize: 15),)
+                      TextButton(onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Signup()));
+                      }, child: Text("Signup",style: TextStyle(color: Colors.blue, fontSize: 16),))
                     ],
-                  ),
-                ), onPressed: (){}),
-                SizedBox(height: 10),
-                Button(child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.apple, size: 24,),
-                      SizedBox(width: 4,),
-                      Text("Sign in With Apple", style: TextStyle(color: Colors.black, fontSize: 15),)
-                    ],
-                  ),
-                ), onPressed: (){}),
-                SizedBox(height: 15),
-                
-                Spacer(),
-          
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have an account?", style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16
-                    ),),
-          
-                    TextButton(onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Signup()));
-                    }, child: Text("Signup",style: TextStyle(color: Colors.blue, fontSize: 16),))
-                  ],
-                )
-              ],
+                  )
+                ],
+              ),
             ),
-          ),
+        ),
       ),
     );
   }    
