@@ -1,11 +1,19 @@
 import 'package:dreams_decoder/pages/auth/auth_wrapper.dart';
+import 'package:dreams_decoder/providers/user-provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "dotenv");
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider())
+      ],
+      child: const MyApp())
+  );
 }
 
 class MyApp extends StatelessWidget {

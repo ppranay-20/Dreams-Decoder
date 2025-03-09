@@ -20,6 +20,7 @@ class _SignupState extends State<Signup> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   void showAlertDialog(String message) {
     showDialog(
@@ -44,6 +45,9 @@ class _SignupState extends State<Signup> {
   void signUp(String username, String email, String password,
       String confirmPassword, BuildContext context) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       final url = getAPIUrl('auth/register');
       final response = await http.post(url,
           headers: {"Content-Type": "application/json"},
@@ -60,6 +64,8 @@ class _SignupState extends State<Signup> {
       }
     } catch (e) {
       showAlertDialog(e.toString());
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -188,6 +194,7 @@ class _SignupState extends State<Signup> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
+                    disabledBackgroundColor: Colors.blueAccent,
                     padding: EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -204,7 +211,14 @@ class _SignupState extends State<Signup> {
                     }
                   }, // Handle login
                   child: Center(
-                    child: Text(
+                    child: isLoading ? SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    ) : Text(
                       "Sign up",
                       style: TextStyle(
                         fontSize: 16,

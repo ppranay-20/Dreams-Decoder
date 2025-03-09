@@ -1,5 +1,4 @@
 import 'package:dreams_decoder/pages/auth/loggedout.dart';
-import 'package:dreams_decoder/pages/payments/upgrade.dart';
 import 'package:dreams_decoder/pages/privacy/privacy.dart';
 import 'package:dreams_decoder/pages/profile/profile-page.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
@@ -28,10 +27,6 @@ Widget profileOption(IconData icon, String title, String description,
       onTap: onTap,
     ),
   );
-}
-
-void upgradeSubscription(BuildContext context) {
-  Navigator.push(context, MaterialPageRoute(builder: (context) => Upgrade()));
 }
 
 void navigateProfilePage(BuildContext context) {

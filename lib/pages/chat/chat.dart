@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'package:dreams_decoder/providers/user-provider.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/getIdFromJWT.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
   final Map<String, dynamic> chat;
+  final messageLimit;
+  final charLimit;
 
-  ChatPage({required this.chat});
+  ChatPage({required this.chat, required this.charLimit, this.messageLimit});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -20,33 +23,25 @@ class _ChatPageState extends State<ChatPage> {
   bool status = false;
   bool _isLoading = false;
   Map<String, dynamic>? chat;
-  late int messageLimit = 0;
-  late int charaterLimit = 0;
+  late int messageLimit;
+  late int charaterLimit;
+
+  @override 
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     messages = List<Map<String, dynamic>>.from(widget.chat['messages'] ?? []);
     status = widget.chat['status'] == "open" ? true : false;
-    getMessageLimit();
-  }
-
-  void getMessageLimit() async {
-    final userId = await getIdFromJWT();
-    final url = getAPIUrl('users/$userId');
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          messageLimit = data['data']['message_limit'] ?? 0;
-          charaterLimit = data['data']['charater_limit'] ?? 0;
-        });
-      }
-    } catch (e) {
-      debugPrint("An error occured $e");
-    }
+    setState(() {
+      messageLimit = widget.messageLimit;
+      charaterLimit = widget.charLimit;
+    });
   }
 
   Future<void> sendMessage() async {
@@ -82,6 +77,10 @@ class _ChatPageState extends State<ChatPage> {
           messages.add(messageFromResonse);
           messageLimit--;
         });
+
+        if (context.mounted) {
+          await Provider.of<UserProvider>(context, listen: false).getUserData();
+        }
       }
     } catch (e) {
       debugPrint("An error occured $e");
@@ -143,7 +142,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: Container(
-          margin:EdgeInsets.only(left: 10, top: 10, bottom: 10),
+          margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
           width: 36,
           height: 36,
           decoration: BoxDecoration(
@@ -265,11 +264,6 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
-          if (_isLoading)
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(color: Colors.blueAccent),
-            ),
           Padding(
               padding: EdgeInsets.all(8),
               child: !status
@@ -286,26 +280,42 @@ class _ChatPageState extends State<ChatPage> {
                   : Row(
                       children: [
                         Expanded(
-                          child: TextField(
-                            controller: _messageController,
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.grey.shade900,
-                              hintText: "Type a message...",
-                              hintStyle: TextStyle(color: Colors.white70),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextField(
+                                controller: _messageController,
+                                style: TextStyle(color: Colors.white),
+                                maxLength:
+                                    charaterLimit, // Add this to limit text input
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.grey.shade900,
+                                  hintText: "Type a message...",
+                                  hintStyle: TextStyle(color: Colors.white70),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  counterText: "", // Hide the default counter
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                         SizedBox(width: 10),
                         FloatingActionButton(
-                          onPressed: sendMessage,
+                          onPressed: _isLoading ? null : sendMessage,
                           backgroundColor: Colors.blueAccent,
-                          child: Icon(Icons.send, color: Colors.white),
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(Icons.send, color: Colors.white),
                         ),
                       ],
                     )),

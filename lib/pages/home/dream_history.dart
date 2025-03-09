@@ -2,14 +2,17 @@ import 'dart:convert';
 
 import 'package:dreams_decoder/pages/home/dream-table.dart';
 import 'package:dreams_decoder/pages/profile/profile.dart';
+import 'package:dreams_decoder/providers/user-provider.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/getIdFromJWT.dart';
 import 'package:dreams_decoder/pages/chat/chat.dart';
 import 'package:dreams_decoder/utils/getUserData.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:dreams_decoder/widgets/dreams-card.dart';
 import 'package:dreams_decoder/widgets/updgrade-subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class DreamHistory extends StatefulWidget {
   const DreamHistory({super.key});
@@ -27,13 +30,14 @@ class _DreamHistoryState extends State<DreamHistory> {
   DateTime? endDate;
   bool isDateRangeFilterActive = false;
   double profileCompletion = 0.0;
-  int? messageLimit;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
     getAllChats();
-    getProfileCompletion();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).getUserData();
+    });
   }
 
   void getAllChats() async {
@@ -46,12 +50,12 @@ class _DreamHistoryState extends State<DreamHistory> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-         List<dynamic> sortedChats = List.from(data['data']);
-      sortedChats.sort((a, b) {
-        DateTime dateA = DateTime.parse(a['created_at']);
-        DateTime dateB = DateTime.parse(b['created_at']);
-        return dateB.compareTo(dateA);
-      });
+        List<dynamic> sortedChats = List.from(data['data']);
+        sortedChats.sort((a, b) {
+          DateTime dateA = DateTime.parse(a['created_at']);
+          DateTime dateB = DateTime.parse(b['created_at']);
+          return dateB.compareTo(dateA);
+        });
 
         setState(() {
           isLoading = false;
@@ -65,6 +69,19 @@ class _DreamHistoryState extends State<DreamHistory> {
   }
 
   void createNewChat() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageLimit = userProvider.userData?['message_limit'] as int;
+    final charLimit = userProvider.userData?['character_limit'] as int;
+    final isLoading = userProvider.isLoading;
+
+    if (isLoading) return;
+
+    if (messageLimit <= 0) {
+      showErrorSnackBar(
+          context, "You don't have message left, Please buy more messages");
+      return;
+    }
+
     final url = getAPIUrl('chat');
     final String customerId = await getIdFromJWT();
     final currentDate = DateTime.now().toUtc().toIso8601String();
@@ -90,7 +107,7 @@ class _DreamHistoryState extends State<DreamHistory> {
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChatPage(chat: chat),
+              builder: (context) => ChatPage(chat: chat, messageLimit: messageLimit, charLimit: charLimit),
             ));
         getAllChats();
       }
@@ -119,9 +136,11 @@ class _DreamHistoryState extends State<DreamHistory> {
   }
 
   void navigateToChat(Map<String, dynamic> chat) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageLimit = userProvider.userData?['message_limit'] as int;
+    final charLimit = userProvider.userData?['character_limit'] as int;
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ChatPage(chat: chat)));
-
+        context, MaterialPageRoute(builder: (context) => ChatPage(chat: chat, messageLimit: messageLimit, charLimit: charLimit,)));
     getAllChats();
   }
 
@@ -189,7 +208,6 @@ class _DreamHistoryState extends State<DreamHistory> {
       final userData = await getUserData();
       setState(() {
         profileCompletion = calculateProfileCompletion(userData);
-        messageLimit = userData['message_limit'];
       });
     } catch (e) {
       debugPrint("Error fetching profile: $e");
@@ -215,6 +233,7 @@ class _DreamHistoryState extends State<DreamHistory> {
   @override
   Widget build(BuildContext context) {
     final filteredChats = getFilteredChats();
+
     return Scaffold(
       body: Container(
         color: Colors.black,
@@ -259,90 +278,96 @@ class _DreamHistoryState extends State<DreamHistory> {
                 SizedBox(height: 20),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(
-                            12), // Add some padding for better appearance
-                        decoration: BoxDecoration(
-                          color: Colors.white12, // Semi-transparent background
-                          borderRadius: BorderRadius.circular(
-                              10), // Optional rounded corners
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                              Row(children: [
-                                Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
+                    Container(
+                      padding: EdgeInsets.all(
+                          12), // Add some padding for better appearance
+                      decoration: BoxDecoration(
+                        color: Colors.white12, // Semi-transparent background
+                        borderRadius: BorderRadius.circular(
+                            10), // Optional rounded corners
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Consumer<UserProvider>(
+                                builder: (context, userProvider, child) {
+                                  final messageLimit = userProvider
+                                          .userData?['message_limit']
+                                          .toString() ??
+                                      "null";
+
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "Messages left: $messageLimit",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10),
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  "Messages left: $messageLimit",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10),
-                                ),
-                                ),
-                                SizedBox(width: 10,),
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
                                     border: Border.all(),
                                     color: Colors.white30,
-                                    borderRadius: BorderRadius.circular(15)
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: () => createNewChat(),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.add, color: Colors.white,),
-                                          SizedBox(width: 5,),
-                                          Text("Add a Dream", style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white
-                                          ),)
-                                        ],
-                                      ),
+                                    shape: BoxShape.circle),
+                                child: GestureDetector(
+                                  onTap: () => createNewChat(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 6.0),
+                                    child: Icon(
+                                      Icons.add,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                )
-                              ],),
-                            SizedBox(height: 12),
-                            Text(
-                              "It looks like you're nearing the end\nof your free monthly dream credits.",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            GestureDetector(
-                              onTap: () {
-                                showPaymentDialog(context);
-                              },
-                              child: Text(
-                                "Click here to top-up your plan",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
+                            ],
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            "It looks like you're nearing the end\nof your free monthly dream credits.",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
                             ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () {
+                              showPaymentDialog(context);
+                            },
+                            child: Text(
+                              "Click here to top-up your plan",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(width: 20),
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 150,
+                      height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.black,
@@ -353,42 +378,47 @@ class _DreamHistoryState extends State<DreamHistory> {
                     ),
                   ],
                 ),
-
-                SizedBox(
-                  child: DreamsTable(
-                    events: events,
-                    onDateSelected: onDateSelected,
-                    clearDateSelected: clearDateSelected,
-                    onDateRangeSelected: onDateRangeSelected,
-                  ),
-                ),
-
-                SizedBox(height: 20),
-
-                /// Fetch and Display Dream List
                 Expanded(
-                    child: isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : filteredChats.isNotEmpty
-                            ? ListView.builder(
-                                itemCount: filteredChats.length,
-                                itemBuilder: (context, index) {
-                                  final chat = filteredChats[index];
-                                  return DreamCard(
-                                      chat: chat,
-                                      navigateToChat: navigateToChat);
-                                })
-                            : Center(
-                                child: Text(
+                  child: ListView(
+                    children: [
+                      // Dreams table section
+                      DreamsTable(
+                        events: events,
+                        onDateSelected: onDateSelected,
+                        clearDateSelected: clearDateSelected,
+                        onDateRangeSelected: onDateRangeSelected,
+                      ),
+
+                      SizedBox(height: 20),
+
+                      // Chat list section
+                      isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : filteredChats.isEmpty
+                              ? Center(
+                                  child: Text(
                                     isDateRangeFilterActive
                                         ? "No dreams found within the selected date range"
                                         : selectedDate != null
                                             ? "No dreams for this date"
                                             : "No dreams found",
-                                    style: TextStyle(color: Colors.white70)),
-                              )),
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: filteredChats.length,
+                                  itemBuilder: (context, index) {
+                                    final chat = filteredChats[index];
+                                    return DreamCard(
+                                        chat: chat,
+                                        navigateToChat: navigateToChat);
+                                  },
+                                ),
+                    ],
+                  ),
+                )
               ],
             ),
           ),

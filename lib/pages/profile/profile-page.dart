@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:dreams_decoder/providers/user-provider.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/getUserData.dart';
 import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -90,28 +91,30 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   var userData;
+  bool isLoading = false;
 
   String? selectedGender;
   String? selectedOccupation;
   String? selectedCulturalGroup;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     initializeUser();
   }
 
   void initializeUser() async {
-    final data = await getUserData();
-    if (data != null) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.userData;
+    if (user != null) {
       setState(() {
-        userData = data;
-        nameController.text = data['name'] ?? '';
-        ageController.text = data['age']?.toString() ?? '';
+        userData = user;
+        nameController.text = user['name'] ?? '';
+        ageController.text = user['age']?.toString() ?? '';
 
-        selectedGender = data['gender'];
-        selectedOccupation = data['occupation'];
-        selectedCulturalGroup = data['cultural_group'];
+        selectedGender = user['gender'];
+        selectedOccupation = user['occupation'];
+        selectedCulturalGroup = user['cultural_group'];
       });
     }
   }
@@ -135,6 +138,9 @@ class _ProfilePageState extends State<ProfilePage> {
     };
 
     try {
+      setState(() {
+        isLoading = true;
+      });
       final id = userData['id'];
       final url = getAPIUrl('users/$id');
       final response = await http.put(url,headers: {
@@ -143,9 +149,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if(response.statusCode == 200) {
         showSuccessSnackbar(context, "Updated Successfully");
+        await Provider.of<UserProvider>(context, listen: false).getUserData();
+
       }
     } catch (e) {
       debugPrint("Failed to update user details $e");
+    }
+    finally {
+      isLoading = false;
     }
   }
 
@@ -296,15 +307,24 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: updateDetails,
+                onPressed: isLoading ? null : updateDetails,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
+                  disabledBackgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text("Update",
+                child: isLoading ?
+                SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                  ),
+                ) 
+                : Text("Update",
                     style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             )
