@@ -1,5 +1,5 @@
-import 'package:dreams_decoder/pages/home/dream_history.dart';
 import 'package:dreams_decoder/pages/auth/signin.dart';
+import 'package:dreams_decoder/widgets/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -36,6 +36,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return isAuthenticated ? const DreamHistory() : const Signin();
+    return isAuthenticated ? const MainScreen() : const Signin();
   }
 }

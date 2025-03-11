@@ -3,83 +3,115 @@ import 'package:intl/intl.dart';
 
 class DreamCard extends StatelessWidget {
   final dynamic chat;
-  final navigateToChat;
-  const DreamCard({super.key, required this.chat, required this.navigateToChat});
+  final Function navigateToChat;
+
+  const DreamCard(
+      {super.key, required this.chat, required this.navigateToChat});
 
   @override
   Widget build(BuildContext context) {
     final String rawDate = chat['chat_open'];
     DateTime parsedDate = DateTime.parse(rawDate);
-    final String day = DateFormat('EEE').format(parsedDate).toUpperCase(); 
-    final String date = DateFormat('d').format(parsedDate);
-    final String month = DateFormat('MMM').format(parsedDate).toUpperCase();
+    final String date = DateFormat('MMM d').format(parsedDate);
     final messages = chat['messages'] ?? [];
-    final String firstMessage = messages.isNotEmpty ? messages[0]['content'] : "No messages";
+    final String firstMessage =
+        messages.isNotEmpty ? messages[0]['content'] : "No messages";
 
-    
     return GestureDetector(
       onTap: () => navigateToChat(chat),
       child: Container(
         margin: EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
-          color: Colors.white10,
+          border: Border.all(color: Color(0xFF733683), width: 1),
+          color: Color(0xFF160816),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-              decoration: BoxDecoration(
-                color: Colors.blue, // Background color for date box
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    day,
-                    style: const TextStyle(
+        // Use IntrinsicHeight to ensure both sides have the same height
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Message content - takes available space
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    firstMessage,
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 5,
                   ),
-                  Text(
-                    date,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    month,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 10,),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  firstMessage,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 3,
                 ),
               ),
-            ),
-          ],
+
+              // Right side panel with two different colored sections
+              SizedBox(
+                width: 70, // Fixed width for the right panel
+                child: Column(
+                  children: [
+                    // Top section with darker purple and date
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                        color:
+                            Color(0xFF733683), // Darker purple for top section
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(11),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          date,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Bottom section with lighter purple and "Full chat"
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color(
+                              0xFF3D1F3D), // Lighter purple for bottom section
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(11),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom: 3, top: 20, right: 6),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "Full chat >",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

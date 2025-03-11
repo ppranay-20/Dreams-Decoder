@@ -14,58 +14,85 @@ class _LoggedOutState extends State<LoggedOut> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Colors.black,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(20, 100, 20, 0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.network("assets/logo.png",fit: BoxFit.contain,width: 300,),
-            SizedBox(
-              height: 40,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              "cat.png",
+              fit: BoxFit.cover,
             ),
-            Text(
-              "Hey there, dreamer! I'm Murka, your feline guide to the mystical world of dreams. Are you ready to explore the secrets of your nighttime adventures?",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white
-              ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 60, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "logo.png",
+                          fit: BoxFit.contain,
+                          width: 300,
+                        ),
+                        SizedBox(height: 40),
+                        Text(
+                          "Hey there, dreamer! I'm Murka, your feline guide to the mystical world of dreams. Are you ready to explore the secrets of your nighttime adventures?",
+                          style: TextStyle(fontSize: 15, color: Colors.white),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "With Murkaverse, we'll decode hidden messages and unravel mysteries.",
+                          style: TextStyle(fontSize: 15, color: Colors.white),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "Let's dive into the dreamscape and see what amazing stories await!",
+                          style: TextStyle(fontSize: 15, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 40),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Button(
+                        color: Color(0xFFE152C2),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Signup()));
+                        },
+                        child: Text("Register",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                      SizedBox(height: 10),
+                      Button(
+                        color: Colors.white,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Signin()));
+                        },
+                        child: Text("Sign In",
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 18)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 20,),
-            Text(
-              "With Murkaverse, we'll decode hidden messages and unravel mysteries.",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white
-              ),
-            ),
-            SizedBox(height: 20,),
-            Text(
-              "Let's dive into the dreamscape and see what amazing stories await!",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white
-              ),
-            ),
-            SizedBox(height: 20,),
-            Image.asset("assets/murka.png", fit: BoxFit.contain,),
-            SizedBox(height: 20,),
-            Button(color: Colors.blue, onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Signup())
-              );
-            },child: Text("Sign Up",  style: TextStyle(color: Colors.white, fontSize: 18)),),
-            SizedBox(height: 10,),
-            Button(color: Colors.white, onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Signin())
-              );
-            },child: Text("Sign In",  style: TextStyle(color: Colors.black, fontSize: 18)),),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

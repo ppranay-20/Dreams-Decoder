@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dreams_decoder/pages/home/dream-table.dart';
-import 'package:dreams_decoder/pages/profile/profile.dart';
+import 'package:dreams_decoder/pages/questionaire/questionaire.dart';
 import 'package:dreams_decoder/providers/user-provider.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
 import 'package:dreams_decoder/utils/getIdFromJWT.dart';
@@ -107,7 +107,8 @@ class _DreamHistoryState extends State<DreamHistory> {
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChatPage(chat: chat, messageLimit: messageLimit, charLimit: charLimit),
+              builder: (context) => ChatPage(
+                  chat: chat, messageLimit: messageLimit, charLimit: charLimit),
             ));
         getAllChats();
       }
@@ -140,7 +141,13 @@ class _DreamHistoryState extends State<DreamHistory> {
     final messageLimit = userProvider.userData?['message_limit'] as int;
     final charLimit = userProvider.userData?['character_limit'] as int;
     await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ChatPage(chat: chat, messageLimit: messageLimit, charLimit: charLimit,)));
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatPage(
+                  chat: chat,
+                  messageLimit: messageLimit,
+                  charLimit: charLimit,
+                )));
     getAllChats();
   }
 
@@ -235,60 +242,42 @@ class _DreamHistoryState extends State<DreamHistory> {
     final filteredChats = getFilteredChats();
 
     return Scaffold(
-      body: Container(
-        color: Colors.black,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.network(
-                      "https://s3-alpha-sig.figma.com/img/add9/4065/46d082f4367c08f6cb77204e0e16b900?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=CDiP-4M6iPbRRiU0nm5VK3h0VHMWU42HKbfbExcR4P1HC9R886DQpl1rEdTV5oe3~81dgr2V-z2szRPIztQSHZ09C7LWSNR7yBwK9exDCd6UvIeivxXQk-grUZAzptU6LOjZlWxuRHV8KOo7MGj9unJAbZY7586gjD6xQ8NLWoxL1MApn7QQq7PgikbeQ0nypgSCwOQOWfZpXZzbL7PKf4dzbgW7KbsIgeIa4Xw3nh49siXKZPYmYMSKUsTdC7gbF3WNfhIh3Bf5zsx7AWgXWz4jLuAkMa-LB9PoBsYaeIFGU98xoC1kJqqyj8DX4PveGMfhJsGt-NwM61qY8Uqdkw__",
-                      fit: BoxFit.contain,
-                      height: 50,
-                      width: 200,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => Profile()));
-                      },
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(30),
-                            color: Colors.white),
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.person, // Profile icon
-                            color: Colors.black,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(
-                          12), // Add some padding for better appearance
-                      decoration: BoxDecoration(
-                        color: Colors.white12, // Semi-transparent background
-                        borderRadius: BorderRadius.circular(
-                            10), // Optional rounded corners
-                      ),
-                      child: Column(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 6),
+              Image.asset(
+                "logo.png",
+                fit: BoxFit.contain,
+                height: 50,
+                width: 200,
+              ),
+              SizedBox(
+                height: 3,
+              ),
+              Text(
+                "The hidden potential in dreams.",
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFFF5E2FD),
+                    fontWeight: FontWeight.w500),
+              ),
+              SizedBox(height: 24),
+              Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF301530), // Semi-transparent background
+                    borderRadius:
+                        BorderRadius.circular(10), // Optional rounded corners
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
@@ -343,19 +332,19 @@ class _DreamHistoryState extends State<DreamHistory> {
                           Text(
                             "It looks like you're nearing the end\nof your free monthly dream credits.",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFFF5E2FD),
                               fontSize: 12,
                             ),
                           ),
                           SizedBox(height: 4),
                           GestureDetector(
                             onTap: () {
-                              showPaymentDialog(context);
+                              showEndChatQuestionnaire(context);
                             },
                             child: Text(
                               "Click here to top-up your plan",
                               style: TextStyle(
-                                color: Colors.blue,
+                                color: Color(0xFF699DFF),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -363,64 +352,59 @@ class _DreamHistoryState extends State<DreamHistory> {
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(width: 20),
-                    Container(
-                      width: 150,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black,
+                      SizedBox(width: 20),
+                      Image.asset(
+                        'cat2.png',
+                        width: 150,
+                        height: 120,
                       ),
-                      child: Image.asset(
-                        'assets/murka.png',
-                      ),
+                    ],
+                  )),
+              SizedBox(
+                height: 20,
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    // Dreams table section
+                    DreamsTable(
+                      events: events,
+                      onDateSelected: onDateSelected,
+                      clearDateSelected: clearDateSelected,
+                      onDateRangeSelected: onDateRangeSelected,
                     ),
+
+                    SizedBox(height: 20),
+
+                    // Chat list section
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : filteredChats.isEmpty
+                            ? Center(
+                                child: Text(
+                                  isDateRangeFilterActive
+                                      ? "No dreams found within the selected date range"
+                                      : selectedDate != null
+                                          ? "No dreams for this date"
+                                          : "No dreams found",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: filteredChats.length,
+                                itemBuilder: (context, index) {
+                                  final chat = filteredChats[index];
+                                  return DreamCard(
+                                      chat: chat,
+                                      navigateToChat: navigateToChat);
+                                },
+                              ),
                   ],
                 ),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      // Dreams table section
-                      DreamsTable(
-                        events: events,
-                        onDateSelected: onDateSelected,
-                        clearDateSelected: clearDateSelected,
-                        onDateRangeSelected: onDateRangeSelected,
-                      ),
-
-                      SizedBox(height: 20),
-
-                      // Chat list section
-                      isLoading
-                          ? Center(child: CircularProgressIndicator())
-                          : filteredChats.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    isDateRangeFilterActive
-                                        ? "No dreams found within the selected date range"
-                                        : selectedDate != null
-                                            ? "No dreams for this date"
-                                            : "No dreams found",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: filteredChats.length,
-                                  itemBuilder: (context, index) {
-                                    final chat = filteredChats[index];
-                                    return DreamCard(
-                                        chat: chat,
-                                        navigateToChat: navigateToChat);
-                                  },
-                                ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),

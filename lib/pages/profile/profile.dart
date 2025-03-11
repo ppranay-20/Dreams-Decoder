@@ -15,15 +15,58 @@ class Profile extends StatefulWidget {
 Widget profileOption(IconData icon, String title, String description,
     BuildContext context, VoidCallback onTap) {
   return Card(
-    color: Colors.grey.shade900,
+    color: Color(0xFF180E18),
     elevation: 2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(
+        color: Color(0xFF592B65),
+        width: 1.0,
+      ),
+    ),
     child: ListTile(
-      leading: Icon(icon, color: Colors.white),
-      title: Text(title,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      subtitle: Text(description, style: TextStyle(color: Colors.white70)),
-      trailing: Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 18),
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        width: 60,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: Color(0xFF301530),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+          ),
+        ),
+        child: Center(
+          child: Icon(icon, color: Color(0xFFDEB9ED), size: 24),
+        ),
+      ),
+      title: Padding(
+        padding: const EdgeInsets.only(left: 4.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Color(0xFFF5E2FD),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              description,
+              style: TextStyle(
+                color: Color(0xFFF5E2FD).withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+      trailing: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(Icons.chevron_right, color: Color(0xFF592B65), size: 24),
+      ),
       onTap: onTap,
     ),
   );
@@ -47,34 +90,14 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: Container(
-          margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-              size: 20,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        title: Text(
-          "Profile",
-          style: TextStyle(
-              fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+        toolbarHeight: 50,
+        backgroundColor: Color(0xFF180E18),
+        title: Text("Profile",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.bold)),
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -84,17 +107,6 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 20,
             ),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey.shade800,
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
             profileOption(
                 Icons.person,
                 "Profile Settings",
@@ -103,26 +115,92 @@ class _ProfileState extends State<Profile> {
                 () => navigateProfilePage(context)),
             profileOption(Icons.message, "Contact Us",
                 "Get In touch with our team", context, () {}),
-            profileOption(Icons.lock, "Privacy", "Manage your privacy settings",
-                context, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PrivacyPolicyPage()));
-                }),
+            profileOption(
+                Icons.lock, "Privacy", "Manage your privacy settings", context,
+                () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => PrivacyPolicyPage()));
+            }),
             SizedBox(
               height: 8,
             ),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () {
                 signOut();
               },
-              icon: Icon(Icons.logout, color: Colors.red),
-              label: Text("Logout",
-                  style: TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
+                padding: EdgeInsets.zero, // Remove default padding
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Color(0xFF101D3C)),
+                child: Container(
+                  height: 60, // Match image height
+                  constraints: BoxConstraints(minWidth: double.infinity),
+                  child: Row(
+                    children: [
+                      // Blue square on the left with icon
+                      Container(
+                        width: 60, // Square left section
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2563EB),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.logout,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      // Middle text section
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Log Out",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                "Sign out of your account",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Right arrow icon
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Icon(
+                          Icons.chevron_right,
+                          color: Colors.blue,
+                          size: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             )
           ],

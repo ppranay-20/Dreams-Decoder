@@ -28,22 +28,22 @@ Widget _buildInputField(
     TextField(
       controller: controller,
       keyboardType: type,
-      style: TextStyle(color: Colors.black, fontSize: 15),
+      style: TextStyle(color: Color(0xFFDFBAEF), fontSize: 15),
       decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Color(0xFF301530),
           hintText: displayName,
-          hintStyle: TextStyle(fontSize: 15),
+          hintStyle: TextStyle(fontSize: 15, color: Color(0xFFDFBAEF)),
           border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: Colors.white)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFF301530))),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: Colors.blue)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFF301530))),
           disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide(color: Colors.grey))),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFF301530)))),
     ),
   ]);
 }
@@ -56,29 +56,28 @@ Widget _buildDropdown(String displayName, List<String> dropdownItems,
       Text(
         displayName,
         style: TextStyle(
-          color: Colors.white,
-        ),
+            color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
       ),
       SizedBox(
         height: 5,
       ),
       DropdownButtonFormField(
         value: initialValue,
-        dropdownColor: Colors.grey,
-        hint: Text(displayName, style: TextStyle(color: Colors.grey)),
+        dropdownColor: Color(0xFF301530),
+        hint: Text(displayName, style: TextStyle(color: Color(0xFFDFBAEF))),
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Color(0xFF301530),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Color(0xFF301530)),
           ),
         ),
         items: dropdownItems.map((String item) {
           return DropdownMenuItem<String>(
             value: item,
             child: Text(item,
-                style: TextStyle(color: Colors.black)), // Display text
+                style: TextStyle(color: Color(0xFFDFBAEF))), // Display text
           );
         }).toList(),
         onChanged: onChanged,
@@ -143,19 +142,17 @@ class _ProfilePageState extends State<ProfilePage> {
       });
       final id = userData['id'];
       final url = getAPIUrl('users/$id');
-      final response = await http.put(url,headers: {
-        'Content-Type': 'application/json'
-      }, body: jsonEncode(formData));
+      final response = await http.put(url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(formData));
 
-      if(response.statusCode == 200) {
+      if (response.statusCode == 200) {
         showSuccessSnackbar(context, "Updated Successfully");
         await Provider.of<UserProvider>(context, listen: false).getUserData();
-
       }
     } catch (e) {
       debugPrint("Failed to update user details $e");
-    }
-    finally {
+    } finally {
       isLoading = false;
     }
   }
@@ -163,97 +160,41 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        toolbarHeight: 100,
+        backgroundColor: Color(0xFF180E18),
+        leading: Container(
+          margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Color(0xFF301530),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.arrow_back,
+              color: Color(0xFFE152C2),
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        title: Text(
+          "Profile",
+          style: TextStyle(
+              fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(12, 10, 12, 15),
+        padding: EdgeInsets.fromLTRB(15, 10, 15, 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                  ),
-                ],
-              ),
-            SizedBox(height: 10,),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: Text(
-                "Just a few things before you start!",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
-                softWrap: true,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              child: Text(
-                "Hey Joe! Let’s get to know each other before things get serious",
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white),
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: Image.asset(
-                      'assets/murka.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "My name is Murka and I will be your dream guide.",
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "I like to sleep a lot and when\n i’m done sleeping,\n I will sleep some more.",
-                          style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white),
-                          softWrap: true,
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Expanded(
+            Flexible(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -302,30 +243,27 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             SizedBox(
-              height: 20,
-            ),
-            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: isLoading ? null : updateDetails,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  disabledBackgroundColor: Colors.blue,
+                  backgroundColor: Color(0xFFE152C2),
+                  disabledBackgroundColor: Color(0xFFE152C2),
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: isLoading ?
-                SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                  ),
-                ) 
-                : Text("Update",
-                    style: TextStyle(color: Colors.white, fontSize: 16)),
+                child: isLoading
+                    ? SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                    : Text("Save & Continue",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             )
           ],

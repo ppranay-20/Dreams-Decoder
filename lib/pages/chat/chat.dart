@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:dreams_decoder/pages/questionaire/questionaire.dart';
 import 'package:dreams_decoder/providers/user-provider.dart';
+import 'package:dreams_decoder/utils/snackbar.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dreams_decoder/utils/convert-to-uri.dart';
@@ -26,12 +28,11 @@ class _ChatPageState extends State<ChatPage> {
   late int messageLimit;
   late int charaterLimit;
 
-  @override 
+  @override
   void dispose() {
     _messageController.dispose();
     super.dispose();
   }
-
 
   @override
   void didChangeDependencies() {
@@ -121,7 +122,8 @@ class _ChatPageState extends State<ChatPage> {
                       setState(() {
                         chat = updatedChat;
                         status = updatedChat["status"] == "open" ? true : false;
-                        Navigator.pop(context);
+                        showSuccessSnackbar(context, "Chat ended successfully");
+                        showEndChatQuestionnaire(context);
                       });
                     }
                   } catch (e) {
@@ -138,15 +140,16 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 100,
+        backgroundColor: Color(0xFF180E18),
+        elevation: 0,
         leading: Container(
           margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: Color(0xFFE152C2),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -161,57 +164,25 @@ class _ChatPageState extends State<ChatPage> {
             },
           ),
         ),
-        title: Text("Murka Chat", style: TextStyle(color: Colors.white)),
         centerTitle: true,
+        title: Text(
+          "Dream Chat",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
-          status
-              ? TextButton(
-                  onPressed: () {
-                    endChat();
-                  },
-                  child: Text(
-                    "End Chat",
-                    style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.red,
-                        fontWeight: FontWeight.normal),
-                  ))
-              : SizedBox()
+          TextButton(
+            onPressed: () {
+              endChat();
+            },
+            child: Text("End Chat", style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-            child: Column(
-              children: [
-                Text(
-                  "Welcome to Murkaverse, let's get to decoding your dreams!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade800,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.message, color: Colors.white70, size: 16),
-                      SizedBox(width: 5),
-                      Text(
-                        "Messages: $messageLimit",
-                        style: TextStyle(color: Colors.white70),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 5),
@@ -230,16 +201,19 @@ class _ChatPageState extends State<ChatPage> {
                         if (!isUser)
                           Container(
                             margin: EdgeInsets.only(right: 8, top: 5),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF301530),
+                              shape: BoxShape.circle,
+                            ),
                             width: 30,
                             height: 30,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.purple.shade700,
-                              image: DecorationImage(
-                                image: AssetImage('assets/murka.png'),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                            child: Icon(Icons.star, color: Color(0xFFE152C2)),
+                          ),
+                        if (index == 0 && messages.isNotEmpty)
+                          SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: Image.asset("cat3.png"),
                           ),
                         Container(
                           margin: EdgeInsets.symmetric(vertical: 5),
@@ -249,14 +223,16 @@ class _ChatPageState extends State<ChatPage> {
                                 0.7, // Limit bubble width
                           ),
                           decoration: BoxDecoration(
-                            color: isUser
-                                ? Colors.blueAccent
-                                : Colors.grey.shade800,
+                            color:
+                                isUser ? Color(0xFF101D3C) : Color(0xFF301530),
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Text(
                             messages[index]["content"]!,
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                                color: isUser
+                                    ? Color(0xFF8EABED)
+                                    : Color(0xFFDFBAEF)),
                           ),
                         ),
                       ]),
@@ -290,11 +266,11 @@ class _ChatPageState extends State<ChatPage> {
                                     charaterLimit, // Add this to limit text input
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.grey.shade900,
+                                  fillColor: Color(0xFF101D3C),
                                   hintText: "Type a message...",
                                   hintStyle: TextStyle(color: Colors.white70),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide.none,
                                   ),
                                   counterText: "", // Hide the default counter
@@ -307,6 +283,7 @@ class _ChatPageState extends State<ChatPage> {
                         FloatingActionButton(
                           onPressed: _isLoading ? null : sendMessage,
                           backgroundColor: Colors.blueAccent,
+                          shape: CircleBorder(),
                           child: _isLoading
                               ? SizedBox(
                                   width: 20,
