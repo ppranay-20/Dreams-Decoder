@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:dreams_decoder/providers/user-provider.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/getIdFromJWT.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
+import 'package:murkaverse/providers/user-provider.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/getIdFromJWT.dart';
+import 'package:murkaverse/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 void showPaymentDialog(BuildContext context) {
   showDialog(
@@ -29,20 +28,12 @@ class _PaymentDialogState extends State<PaymentDialog> {
   List<dynamic> paymentPlans = [];
   dynamic selectedPlan;
   int? amount;
-  final _razorpay = Razorpay();
+  bool isPaymentLoading = false;
 
   @override
   void initState() {
     super.initState();
     getPaymentPlans();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-  }
-
-  @override
-  void dispose() {
-    _razorpay.clear();
-    super.dispose();
   }
 
   void getPaymentPlans() async {
@@ -75,54 +66,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
     }
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    final customerId = await getIdFromJWT();
-    final paymentPlanId = selectedPlan['id'];
-    String now = DateTime.now().toUtc().toIso8601String();
-    final int expirationDays = selectedPlan['expiration_days'];
-    DateTime expirationDate =
-        DateTime.now().add(Duration(days: expirationDays));
-
-    final paymentPayload = {
-      'customer_id': customerId,
-      'payment_plan_id': paymentPlanId,
-      'payment_date': now,
-      'expiration_date': expirationDate.toUtc().toIso8601String()
-    };
-
-    try {
-      final url = getAPIUrl('payments');
-      final response = await http.post(url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(paymentPayload));
-
-      setState(() {
-        isLoading = false;
-      });
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          showSuccessSnackbar(context, "Payment Done Successfully");
-          await Provider.of<UserProvider>(context, listen: false).getUserData();
-          Navigator.pop(context);
-        }
-      } else {
-        showErrorSnackBar(context, "Payment Failed");
-      }
-    } catch (e) {
-      showErrorSnackBar(context, "An error occurred: $e");
-    }
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    // Handle payment failure
-    String errorMessage = "Payment failed";
-    if (response.message != null) {
-      errorMessage += ": ${response.message}";
-    }
-    showErrorSnackBar(context, errorMessage);
-  }
-
   void upgradeSubscription() async {
     if (selectedPlan == null) {
       showErrorSnackBar(context, "Please select a plan first");
@@ -136,57 +79,88 @@ class _PaymentDialogState extends State<PaymentDialog> {
       return;
     }
 
-    var options = {
-      'key': key,
-      'amount': selectedPlan['amount'] * 100,
-      'name': 'Murkaverse',
-      'description': '${selectedPlan["message_limit"]} additional messages',
-      'prefill': {'contact': '8888888888', 'email': 'test@razorpay.com'}
-    };
+    setState(() {
+      isPaymentLoading = true;
+    });
 
     try {
-      _razorpay.open(options);
+      final customerId = await getIdFromJWT();
+      final paymentPlanId = selectedPlan['id'];
+      String now = DateTime.now().toUtc().toIso8601String();
+      final int expirationDays = selectedPlan['expiration_days'];
+      DateTime expirationDate =
+          DateTime.now().add(Duration(days: expirationDays));
+
+      final paymentPayload = {
+        'customer_id': customerId,
+        'payment_plan_id': paymentPlanId,
+        'payment_date': now,
+        'expiration_date': expirationDate.toUtc().toIso8601String()
+      };
+
+      try {
+        final url = getAPIUrl('payments');
+        final response = await http.post(url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(paymentPayload));
+
+        setState(() {
+          isLoading = false;
+        });
+
+        if (response.statusCode == 200) {
+          if (mounted) {
+            showSuccessSnackbar(context, "Payment Done Successfully");
+            await Provider.of<UserProvider>(context, listen: false)
+                .getUserData();
+            Navigator.pop(context);
+          }
+        } else {
+          showErrorSnackBar(context, "Payment Failed");
+        }
+      } catch (e) {
+        showErrorSnackBar(context, "An error occurred: $e");
+      }
     } catch (err) {
       showErrorSnackBar(context, "Error opening payment: $err");
+    } finally {
+      setState(() {
+        isPaymentLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Color(0xFF180E18),
       insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
         width: double.infinity,
         constraints: BoxConstraints(
           maxWidth: 320,
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Color(0xFF180E18),
           borderRadius: BorderRadius.circular(15),
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
             : SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        4,
-                        (index) => Icon(Icons.nightlight_round,
-                            color: Colors.orangeAccent, size: 30),
-                      ),
-                    ),
-                    SizedBox(height: 10),
                     Text(
                       "Add Messages to your account!",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 15),
@@ -203,11 +177,15 @@ class _PaymentDialogState extends State<PaymentDialog> {
                               return ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isSelected
-                                      ? Colors.blue
-                                      : Colors.pinkAccent[300],
+                                      ? Color(0xFFE152C2)
+                                      : Color(0xFF101D3C),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
+                                  side: BorderSide(
+                                      color: isSelected
+                                          ? Color(0xFFE152C2)
+                                          : Color(0xFF699DFF)),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -230,21 +208,31 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     Text(
                       "Amount: ${amount ?? "Select a plan"}",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                      style: TextStyle(fontSize: 15, color: Colors.white),
                     ),
                     SizedBox(height: 15),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Color(0xFFE152C2),
+                        disabledBackgroundColor: Color(0xFFE152C2),
                         padding:
                             EdgeInsets.symmetric(horizontal: 50, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: upgradeSubscription,
-                      child: Text("Continue",
-                          style: TextStyle(color: Colors.white)),
+                      onPressed: isPaymentLoading ? null : upgradeSubscription,
+                      child: isPaymentLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 1,
+                              ),
+                            )
+                          : Text("Continue",
+                              style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),

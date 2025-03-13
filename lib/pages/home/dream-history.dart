@@ -1,15 +1,15 @@
 import 'dart:convert';
 
-import 'package:dreams_decoder/pages/home/dream-table.dart';
-import 'package:dreams_decoder/pages/questionaire/questionaire.dart';
-import 'package:dreams_decoder/providers/user-provider.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/getIdFromJWT.dart';
-import 'package:dreams_decoder/pages/chat/chat.dart';
-import 'package:dreams_decoder/utils/getUserData.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
-import 'package:dreams_decoder/widgets/dreams-card.dart';
-import 'package:dreams_decoder/widgets/updgrade-subscription.dart';
+import 'package:murkaverse/pages/home/dream-table.dart';
+import 'package:murkaverse/providers/chat-provider.dart';
+import 'package:murkaverse/providers/user-provider.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/getIdFromJWT.dart';
+import 'package:murkaverse/pages/chat/chat.dart';
+import 'package:murkaverse/utils/getUserData.dart';
+import 'package:murkaverse/utils/snackbar.dart';
+import 'package:murkaverse/widgets/dreams-card.dart';
+import 'package:murkaverse/widgets/updgrade-subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -26,18 +26,12 @@ class _DreamHistoryState extends State<DreamHistory> {
   List<dynamic> chats = [];
   DateTime? selectedDate;
   Map<DateTime, List<dynamic>> events = {};
-  DateTime? startDate;
-  DateTime? endDate;
-  bool isDateRangeFilterActive = false;
   double profileCompletion = 0.0;
 
   @override
   void initState() {
     super.initState();
     getAllChats();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).getUserData();
-    });
   }
 
   void getAllChats() async {
@@ -70,6 +64,7 @@ class _DreamHistoryState extends State<DreamHistory> {
 
   void createNewChat() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final messageLimit = userProvider.userData?['message_limit'] as int;
     final charLimit = userProvider.userData?['character_limit'] as int;
     final isLoading = userProvider.isLoading;
@@ -82,38 +77,21 @@ class _DreamHistoryState extends State<DreamHistory> {
       return;
     }
 
-    final url = getAPIUrl('chat');
-    final String customerId = await getIdFromJWT();
-    final currentDate = DateTime.now().toUtc().toIso8601String();
+    final chat = await chatProvider.createNewChat();
 
-    final newChatPayload = {
-      'customer_id': customerId,
-      'chat_open': currentDate,
-      'status': "open"
-    };
-
-    try {
-      final response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: jsonEncode(newChatPayload));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final chat = data['data'];
-        if (!mounted) return;
-        await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(
-                  chat: chat, messageLimit: messageLimit, charLimit: charLimit),
-            ));
-        getAllChats();
-      }
-    } catch (err) {
-      debugPrint("An error occured $err");
+    if (chat != null) {
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatPage(
+            chat: chat,
+            messageLimit: messageLimit,
+            charLimit: charLimit,
+          ),
+        ),
+      );
+      getAllChats();
     }
   }
 
@@ -138,73 +116,32 @@ class _DreamHistoryState extends State<DreamHistory> {
 
   void navigateToChat(Map<String, dynamic> chat) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
     final messageLimit = userProvider.userData?['message_limit'] as int;
     final charLimit = userProvider.userData?['character_limit'] as int;
+
+    // Set the selected chat as the current chat in the provider
+    chatProvider.setCurrentChat(chat);
+
+    // Navigate to the chat page
     await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => ChatPage(
-                  chat: chat,
-                  messageLimit: messageLimit,
-                  charLimit: charLimit,
-                )));
+          builder: (context) => ChatPage(
+            chat: chat,
+            messageLimit: messageLimit,
+            charLimit: charLimit,
+          ),
+        ));
+
+    // Refresh the chat list after returning
     getAllChats();
-  }
-
-  void onDateSelected(DateTime date) {
-    // Normalize the date by removing time components
-    DateTime normalizedDate = DateTime(date.year, date.month, date.day);
-
-    setState(() {
-      selectedDate = normalizedDate;
-      isDateRangeFilterActive = false;
-      startDate = null;
-      endDate = null;
-    });
-  }
-
-  void clearDateSelected() {
-    setState(() {
-      selectedDate = null;
-      isDateRangeFilterActive = false;
-      startDate = null;
-      endDate = null;
-    });
-  }
-
-  void onDateRangeSelected(DateTime start, DateTime end) {
-    setState(() {
-      // Normalize the dates by removing time components
-      startDate = DateTime(start.year, start.month, start.day);
-      endDate = DateTime(end.year, end.month, end.day);
-      isDateRangeFilterActive = true;
-      // Reset single date selection
-      selectedDate = null;
-    });
-
-    // Debug log to verify dates
-    debugPrint(
-        "Date range filter active: ${startDate!.toString()} to ${endDate!.toString()}");
   }
 
   List<dynamic> getFilteredChats() {
     if (selectedDate != null) {
       return events[selectedDate] ?? [];
-    } else if (isDateRangeFilterActive &&
-        startDate != null &&
-        endDate != null) {
-      return chats.where((chat) {
-        final rawDate = chat['chat_open'];
-        DateTime parsedDate = DateTime.parse(rawDate);
-        DateTime normalizedDate =
-            DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-
-        // Ensure the selected range is correctly applied
-        return normalizedDate.isAtSameMomentAs(startDate!) ||
-            (normalizedDate.isAfter(startDate!) &&
-                normalizedDate.isBefore(endDate!)) ||
-            normalizedDate.isAtSameMomentAs(endDate!);
-      }).toList();
     } else {
       return chats;
     }
@@ -218,6 +155,20 @@ class _DreamHistoryState extends State<DreamHistory> {
       });
     } catch (e) {
       debugPrint("Error fetching profile: $e");
+    }
+  }
+
+  void onDateSelected(DateTime date) {
+    // Check if this is our special signal to clear the date selection
+    if (date.year == 0) {
+      setState(() {
+        selectedDate = null; // Set to null instead of using the DateTime(0)
+      });
+    } else {
+      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+      setState(() {
+        selectedDate = normalizedDate;
+      });
     }
   }
 
@@ -250,7 +201,7 @@ class _DreamHistoryState extends State<DreamHistory> {
             children: [
               SizedBox(height: 6),
               Image.asset(
-                "logo.png",
+                "assets/logo.png",
                 fit: BoxFit.contain,
                 height: 50,
                 width: 200,
@@ -339,7 +290,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                           SizedBox(height: 4),
                           GestureDetector(
                             onTap: () {
-                              showEndChatQuestionnaire(context);
+                              showPaymentDialog(context);
                             },
                             child: Text(
                               "Click here to top-up your plan",
@@ -354,7 +305,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                       ),
                       SizedBox(width: 20),
                       Image.asset(
-                        'cat2.png',
+                        'assets/cat2.png',
                         width: 150,
                         height: 120,
                       ),
@@ -370,8 +321,6 @@ class _DreamHistoryState extends State<DreamHistory> {
                     DreamsTable(
                       events: events,
                       onDateSelected: onDateSelected,
-                      clearDateSelected: clearDateSelected,
-                      onDateRangeSelected: onDateRangeSelected,
                     ),
 
                     SizedBox(height: 20),
@@ -382,11 +331,9 @@ class _DreamHistoryState extends State<DreamHistory> {
                         : filteredChats.isEmpty
                             ? Center(
                                 child: Text(
-                                  isDateRangeFilterActive
-                                      ? "No dreams found within the selected date range"
-                                      : selectedDate != null
-                                          ? "No dreams for this date"
-                                          : "No dreams found",
+                                  selectedDate != null
+                                      ? "No dreams for this date"
+                                      : "No dreams found",
                                   style: TextStyle(color: Colors.white70),
                                 ),
                               )

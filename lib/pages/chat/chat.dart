@@ -1,10 +1,13 @@
 import 'dart:convert';
-import 'package:dreams_decoder/pages/questionaire/questionaire.dart';
-import 'package:dreams_decoder/providers/user-provider.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
+import 'package:murkaverse/pages/questionaire/questionaire.dart';
+import 'package:murkaverse/providers/chat-provider.dart';
+import 'package:murkaverse/providers/user-provider.dart';
+import 'package:murkaverse/utils/snackbar.dart';
+import 'package:murkaverse/widgets/end-chat.dart';
+import 'package:murkaverse/widgets/main-screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -109,16 +112,11 @@ class _ChatPageState extends State<ChatPage> {
               TextButton(
                 onPressed: () async {
                   try {
-                    final chatId = widget.chat['id'];
-                    final url = getAPIUrl('chat/end-chat/$chatId');
+                    final chatProvider =
+                        Provider.of<ChatProvider>(context, listen: false);
+                    final updatedChat = await chatProvider.endCurrentChat();
 
-                    final response = await http.put(url,
-                        body: jsonEncode({"status": "closed"}));
-
-                    if (response.statusCode == 200) {
-                      final data = jsonDecode(response.body);
-                      final updatedChat = data['data'];
-
+                    if (updatedChat != null) {
                       setState(() {
                         chat = updatedChat;
                         status = updatedChat["status"] == "open" ? true : false;
@@ -141,45 +139,34 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 100,
+        toolbarHeight: 80,
         backgroundColor: Color(0xFF180E18),
-        elevation: 0,
         leading: Container(
           margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Color(0xFFE152C2),
+            color: Color(0xFF301530),
             shape: BoxShape.circle,
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.arrow_back,
-              color: Colors.white,
+              color: Color(0xFFE152C2),
               size: 20,
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MainScreen()));
             },
           ),
         ),
-        centerTitle: true,
         title: Text(
           "Dream Chat",
           style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+              fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              endChat();
-            },
-            child: Text("End Chat", style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -189,6 +176,73 @@ class _ChatPageState extends State<ChatPage> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 bool isUser = messages[index]["sent_by"] == "user";
+                bool isFirstMessage = index == 0 && !isUser;
+
+                if (isFirstMessage) {
+                  return Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 150, // Fixed height container to hold the stack
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Cat image positioned above the message
+                            Positioned(
+                              top: -12,
+                              right: 0,
+                              child: Image.asset(
+                                "assets/cat3.png",
+                                width: 120,
+                                height: 120,
+                              ),
+                            ),
+                            // Message with star icon
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 8, top: 5),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF301530),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    width: 30,
+                                    height: 30,
+                                    child: Icon(Icons.star,
+                                        color: Color(0xFFE152C2)),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.only(top: 0),
+                                      padding: EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF301530),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Text(
+                                        messages[index]["content"]!,
+                                        style:
+                                            TextStyle(color: Color(0xFFDFBAEF)),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: 20), // Space for the cat image
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
                 return Align(
                   alignment:
                       isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -209,31 +263,36 @@ class _ChatPageState extends State<ChatPage> {
                             height: 30,
                             child: Icon(Icons.star, color: Color(0xFFE152C2)),
                           ),
-                        if (index == 0 && messages.isNotEmpty)
-                          SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Image.asset("cat3.png"),
-                          ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          padding: EdgeInsets.all(12),
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width *
-                                0.7, // Limit bubble width
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                isUser ? Color(0xFF101D3C) : Color(0xFF301530),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            messages[index]["content"]!,
-                            style: TextStyle(
+                        Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(vertical: 5),
+                              padding: EdgeInsets.all(12),
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width *
+                                    0.8, // Limit bubble width
+                              ),
+                              decoration: BoxDecoration(
                                 color: isUser
-                                    ? Color(0xFF8EABED)
-                                    : Color(0xFFDFBAEF)),
-                          ),
+                                    ? Color(0xFF101D3C)
+                                    : Color(0xFF301530),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Text(
+                                messages[index]["content"]!,
+                                style: TextStyle(
+                                    color: isUser
+                                        ? Color(0xFF8EABED)
+                                        : Color(0xFFDFBAEF)),
+                              ),
+                            ),
+                            if (index == messages.length - 1 && status)
+                              Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child:
+                                    buildChatCreditsBar(messageLimit, endChat),
+                              ),
+                          ],
                         ),
                       ]),
                 );

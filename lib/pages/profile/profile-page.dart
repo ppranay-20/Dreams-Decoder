@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:dreams_decoder/providers/user-provider.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
+import 'package:murkaverse/providers/user-provider.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';

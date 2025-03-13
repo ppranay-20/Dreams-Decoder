@@ -1,14 +1,11 @@
-import 'package:dreams_decoder/pages/chat/chat.dart';
-import 'package:dreams_decoder/pages/profile/profile.dart';
+import 'package:murkaverse/pages/chat/chat.dart';
+import 'package:murkaverse/pages/profile/profile.dart';
+import 'package:murkaverse/providers/chat-provider.dart';
 import 'package:flutter/material.dart';
-import 'package:dreams_decoder/pages/home/dream_history.dart';
+import 'package:murkaverse/pages/home/dream-history.dart';
 import 'package:provider/provider.dart';
-import 'package:dreams_decoder/providers/user-provider.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/getIdFromJWT.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:murkaverse/providers/user-provider.dart';
+import 'package:murkaverse/utils/snackbar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -23,9 +20,17 @@ class _MainScreenState extends State<MainScreen> {
   // Pages to display
   final List<Widget> _pages = [
     DreamHistory(),
-    ChatPage(chat: {}, charLimit: 0), // Placeholder for chat page
+    Container(),
     Profile(), // Your settings page
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).getUserData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
         onTap: (index) {
           // If selecting the chat tab (index 1)
           if (index == 1) {
-            createNewChat();
+            _handleChatTab();
           } else {
             setState(() {
               _currentIndex = index;
@@ -67,13 +72,14 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void createNewChat() async {
+  void _handleChatTab() async {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (userProvider.isLoading || chatProvider.isLoading) return;
+
     final messageLimit = userProvider.userData?['message_limit'] as int? ?? 0;
     final charLimit = userProvider.userData?['character_limit'] as int? ?? 0;
-    final isLoading = userProvider.isLoading;
-
-    if (isLoading) return;
 
     if (messageLimit <= 0) {
       showErrorSnackBar(
@@ -81,39 +87,25 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    final url = getAPIUrl('chat');
-    final String customerId = await getIdFromJWT();
-    final currentDate = DateTime.now().toUtc().toIso8601String();
-
-    final newChatPayload = {
-      'customer_id': customerId,
-      'chat_open': currentDate,
-      'status': "open"
-    };
-
-    try {
-      final response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: jsonEncode(newChatPayload));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final chat = data['data'];
-
-        // Navigate to the chat page with the new chat
+    if (chatProvider.hasActiveChat) {
+      setState(() {
+        _currentIndex = 1;
+        _pages[1] = ChatPage(
+            chat: chatProvider.currentChat!,
+            messageLimit: messageLimit,
+            charLimit: charLimit);
+      });
+    } else {
+      final newChat = await chatProvider.createNewChat();
+      if (newChat != null) {
         setState(() {
-          _currentIndex = 1; // Set to chat tab
+          _currentIndex = 1;
           _pages[1] = ChatPage(
-              chat: chat, messageLimit: messageLimit, charLimit: charLimit);
+              chat: newChat, messageLimit: messageLimit, charLimit: charLimit);
         });
+      } else {
+        showErrorSnackBar(context, "Failed to create a new chat.");
       }
-    } catch (err) {
-      debugPrint("An error occurred: $err");
-      showErrorSnackBar(
-          context, "Failed to create a new chat. Please try again.");
     }
   }
 }

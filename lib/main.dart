@@ -1,5 +1,6 @@
-import 'package:dreams_decoder/pages/auth/auth_wrapper.dart';
-import 'package:dreams_decoder/providers/user-provider.dart';
+import 'package:murkaverse/pages/initial/initial-page.dart';
+import 'package:murkaverse/providers/chat-provider.dart';
+import 'package:murkaverse/providers/user-provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -7,9 +8,10 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "dotenv");
-  runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => UserProvider())],
-      child: const MyApp()));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => UserProvider()),
+    ChangeNotifierProvider(create: (context) => ChatProvider())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: AuthWrapper(),
+      home: InitialPage(),
     );
   }
 }

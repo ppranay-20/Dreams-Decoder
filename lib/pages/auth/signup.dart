@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:dreams_decoder/pages/auth/signin.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
-import 'package:dreams_decoder/widgets/buttons.dart';
+import 'package:murkaverse/pages/auth/signin.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/snackbar.dart';
+import 'package:murkaverse/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 

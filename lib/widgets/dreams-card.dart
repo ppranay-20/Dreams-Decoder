@@ -14,8 +14,9 @@ class DreamCard extends StatelessWidget {
     DateTime parsedDate = DateTime.parse(rawDate);
     final String date = DateFormat('MMM d').format(parsedDate);
     final messages = chat['messages'] ?? [];
-    final String firstMessage =
-        messages.isNotEmpty ? messages[0]['content'] : "No messages";
+    final String firstMessage = messages.isNotEmpty && messages.length > 1
+        ? messages[1]['content']
+        : "No messages";
 
     return GestureDetector(
       onTap: () => navigateToChat(chat),

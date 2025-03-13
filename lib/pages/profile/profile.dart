@@ -1,7 +1,7 @@
-import 'package:dreams_decoder/pages/auth/loggedout.dart';
-import 'package:dreams_decoder/pages/privacy/privacy.dart';
-import 'package:dreams_decoder/pages/profile/profile-page.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
+import 'package:murkaverse/pages/auth/loggedout.dart';
+import 'package:murkaverse/pages/privacy/privacy.dart';
+import 'package:murkaverse/pages/profile/profile-page.dart';
+import 'package:murkaverse/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

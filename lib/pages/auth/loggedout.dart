@@ -1,6 +1,6 @@
-import 'package:dreams_decoder/pages/auth/signin.dart';
-import 'package:dreams_decoder/pages/auth/signup.dart';
-import 'package:dreams_decoder/widgets/buttons.dart';
+import 'package:murkaverse/pages/auth/signin.dart';
+import 'package:murkaverse/pages/auth/signup.dart';
+import 'package:murkaverse/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 
 class LoggedOut extends StatefulWidget {
@@ -19,7 +19,7 @@ class _LoggedOutState extends State<LoggedOut> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              "cat.png",
+              "assets/cat.png",
               fit: BoxFit.cover,
             ),
           ),
@@ -33,7 +33,7 @@ class _LoggedOutState extends State<LoggedOut> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Image.asset(
-                          "logo.png",
+                          "assets/logo.png",
                           fit: BoxFit.contain,
                           width: 300,
                         ),

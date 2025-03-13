@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:dreams_decoder/pages/home/dream_history.dart';
-import 'package:dreams_decoder/pages/auth/signup.dart';
-import 'package:dreams_decoder/utils/convert-to-uri.dart';
-import 'package:dreams_decoder/utils/snackbar.dart';
-import 'package:dreams_decoder/widgets/buttons.dart';
+import 'package:murkaverse/pages/auth/signup.dart';
+import 'package:murkaverse/utils/convert-to-uri.dart';
+import 'package:murkaverse/utils/snackbar.dart';
+import 'package:murkaverse/widgets/buttons.dart';
+import 'package:murkaverse/widgets/main-screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -64,7 +64,7 @@ class _SigninState extends State<Signin> {
         await storage.write(key: 'token', value: token);
         showSuccessSnackbar(context, "Login Successful");
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => DreamHistory()));
+            context, MaterialPageRoute(builder: (context) => MainScreen()));
       } else {
         showErrorSnackBar(context, "Either email or password incorrect");
       }
@@ -105,27 +105,27 @@ class _SigninState extends State<Signin> {
                       "Glad to see you again!",
                       style: TextStyle(color: Colors.white70),
                     ),
-                    SizedBox(
-                      height: 1,
-                    ),
+                    SizedBox(height: 6),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Are you a new User?",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          style: TextStyle(fontSize: 15, color: Colors.white70),
                         ),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Signup()));
-                            },
-                            child: Text(
-                              "Register",
-                              style:
-                                  TextStyle(color: Colors.blue, fontSize: 14),
-                            ))
+                        SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Signup()));
+                          },
+                          child: Text(
+                            "Register",
+                            style: TextStyle(color: Colors.blue, fontSize: 15),
+                          ),
+                        )
                       ],
                     )
                   ],
@@ -137,149 +137,153 @@ class _SigninState extends State<Signin> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextFormField(
-                        controller: emailController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                            fillColor: Color(0xFF301530),
-                            filled: true,
-                            hintText: "Enter your email",
-                            labelText: "Email",
-                            labelStyle: TextStyle(color: Color(0xFFDFBAEF)),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            hintStyle: TextStyle(color: Colors.grey)),
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter you email";
-                          }
-
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: true,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          fillColor: Color(0xFF301530),
-                          filled: true,
-                          hintText: "Enter your Password",
-                          labelText: "Password",
-                          labelStyle: TextStyle(color: Color(0xFFDFBAEF)),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          hintStyle: TextStyle(color: Colors.grey),
-                        ),
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter your password";
-                          } else if (value.length < 6) {
-                            return "Please enter a valid password";
-                          }
-
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFE152C2),
-                          disabledBackgroundColor: Color(0xFFE152C2),
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                if (_formKey.currentState!.validate()) {
-                                  login(emailController.text,
-                                      passwordController.text, context);
-                                }
-                              }, // Handle login
-                        child: Center(
-                          child: isLoading
-                              ? SizedBox(
-                                  height: 23, // Smaller height
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth:
-                                        2.0, // Thinner stroke for a more delicate spinner
-                                  ))
-                              : Text(
-                                  "Sign in",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
+                      Column(
                         children: [
-                          Expanded(child: Divider(color: Colors.white54)),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "or",
-                              style: TextStyle(color: Colors.white70),
+                          TextFormField(
+                            controller: emailController,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                                fillColor: Color(0xFF301530),
+                                filled: true,
+                                hintText: "Enter your email",
+                                labelText: "Email",
+                                labelStyle: TextStyle(color: Color(0xFFDFBAEF)),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                hintStyle: TextStyle(color: Colors.grey)),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return "Please enter you email";
+                              }
+
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              fillColor: Color(0xFF301530),
+                              filled: true,
+                              hintText: "Enter your Password",
+                              labelText: "Password",
+                              labelStyle: TextStyle(color: Color(0xFFDFBAEF)),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              hintStyle: TextStyle(color: Colors.grey),
+                            ),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return "Please enter your password";
+                              } else if (value.length < 6) {
+                                return "Please enter a valid password";
+                              }
+
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFFE152C2),
+                              disabledBackgroundColor: Color(0xFFE152C2),
+                              padding: EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            onPressed: isLoading
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      login(emailController.text,
+                                          passwordController.text, context);
+                                    }
+                                  }, // Handle login
+                            child: Center(
+                              child: isLoading
+                                  ? SizedBox(
+                                      height: 23, // Smaller height
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth:
+                                            2.0, // Thinner stroke for a more delicate spinner
+                                      ))
+                                  : Text(
+                                      "Sign in",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                             ),
                           ),
-                          Expanded(child: Divider(color: Colors.white54)),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(child: Divider(color: Colors.white54)),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  "or",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                              Expanded(child: Divider(color: Colors.white54)),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          Button(
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.g_mobiledata_outlined,
+                                      size: 30,
+                                    ),
+                                    Text(
+                                      "Sign in With Google",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {}),
+                          SizedBox(height: 10),
+                          Button(
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.apple,
+                                      size: 24,
+                                    ),
+                                    SizedBox(
+                                      width: 4,
+                                    ),
+                                    Text(
+                                      "Sign in With Apple",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {}),
+                          SizedBox(height: 20),
                         ],
                       ),
-                      SizedBox(height: 20),
-                      Button(
-                          child: Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.g_mobiledata_outlined,
-                                  size: 30,
-                                ),
-                                Text(
-                                  "Sign in With Google",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600),
-                                )
-                              ],
-                            ),
-                          ),
-                          onPressed: () {}),
-                      SizedBox(height: 10),
-                      Button(
-                          child: Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.apple,
-                                  size: 24,
-                                ),
-                                SizedBox(
-                                  width: 4,
-                                ),
-                                Text(
-                                  "Sign in With Apple",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600),
-                                )
-                              ],
-                            ),
-                          ),
-                          onPressed: () {}),
-                      SizedBox(height: 20),
                       Center(
                         child: TextButton(
                             onPressed: () {},

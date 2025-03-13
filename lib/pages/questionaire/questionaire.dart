@@ -1,8 +1,8 @@
-import 'package:dreams_decoder/pages/questionaire/questions/question-four.dart';
-import 'package:dreams_decoder/pages/questionaire/questions/question-one.dart';
-import 'package:dreams_decoder/pages/questionaire/questions/question-three.dart';
-import 'package:dreams_decoder/pages/questionaire/questions/question-two.dart';
-import 'package:dreams_decoder/widgets/main_screen.dart';
+import 'package:murkaverse/pages/questionaire/questions/question-four.dart';
+import 'package:murkaverse/pages/questionaire/questions/question-one.dart';
+import 'package:murkaverse/pages/questionaire/questions/question-three.dart';
+import 'package:murkaverse/pages/questionaire/questions/question-two.dart';
+import 'package:murkaverse/widgets/main-screen.dart';
 import 'package:flutter/material.dart';
 
 void showEndChatQuestionnaire(BuildContext context) {
