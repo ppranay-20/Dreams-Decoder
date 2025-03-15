@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:murkaverse/pages/auth/signin.dart';
 import 'package:murkaverse/providers/user-provider.dart';
 import 'package:murkaverse/utils/convert-to-uri.dart';
 import 'package:murkaverse/utils/snackbar.dart';
@@ -8,7 +10,10 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final String? id;
+  final String? name;
+  final String? password;
+  const ProfilePage({super.key, this.id, this.name, this.password});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -91,10 +96,17 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController ageController = TextEditingController();
   var userData;
   bool isLoading = false;
+  bool isToken = true;
 
   String? selectedGender;
   String? selectedOccupation;
   String? selectedCulturalGroup;
+
+  @override
+  void initState() {
+    super.initState();
+    checkToken();
+  }
 
   @override
   void didChangeDependencies() {
@@ -103,6 +115,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void initializeUser() async {
+    if (!isToken) {
+      setState(() {
+        nameController.text = widget.name ?? '';
+      });
+    }
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.userData;
     if (user != null) {
@@ -126,10 +143,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void updateDetails() async {
+    final id = widget.id ?? userData['id'];
+
     final formData = {
       "name": nameController.text.toString(),
-      "email": userData['email'],
-      "password": userData['password'],
+      "password": widget.password ?? userData['password'],
       "age": int.tryParse(ageController.text),
       "gender": selectedGender,
       "occupation": selectedOccupation,
@@ -140,15 +158,24 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         isLoading = true;
       });
-      final id = userData['id'];
       final url = getAPIUrl('users/$id');
       final response = await http.put(url,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(formData));
 
       if (response.statusCode == 200) {
-        showSuccessSnackbar(context, "Updated Successfully");
-        await Provider.of<UserProvider>(context, listen: false).getUserData();
+        if (!isToken) {
+          showSuccessSnackbar(context, "Updated Successfully");
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Signin()));
+        } else {
+          showSuccessSnackbar(context, "Updated Successfully");
+          await Provider.of<UserProvider>(context, listen: false).getUserData();
+        }
+      } else {
+        if (!mounted) return;
+        showErrorSnackBar(context, "Failed to update user details");
+        throw Exception(response.body);
       }
     } catch (e) {
       debugPrint("Failed to update user details $e");
@@ -157,49 +184,117 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> checkToken() async {
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    if (token == null) {
+      setState(() {
+        isToken = false;
+      });
+    } else {
+      setState(() {
+        isToken = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 100,
-        backgroundColor: Color(0xFF180E18),
-        leading: Container(
-          margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Color(0xFF301530),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(
-              Icons.arrow_back,
-              color: Color(0xFFE152C2),
-              size: 20,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        title: Text(
-          "Profile",
-          style: TextStyle(
-              fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(15, 10, 15, 15),
+        padding: EdgeInsets.fromLTRB(15, 50, 15, 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            isToken
+                ? Container(
+                    child: Row(
+                      children: [
+                        Container(
+                          margin:
+                              EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF301530),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: Color(0xFFE152C2),
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text("Profile",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  )
+                : Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    padding: EdgeInsets.symmetric(vertical: 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Just a few things before you start!",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                            "Hey Joe! Let’s get to know each other before things get serious",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
             Flexible(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: !isToken
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Image.asset(
+                                    "assets/cat-moon.png",
+                                    fit: BoxFit.cover,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Image.asset(
+                                      "assets/signuptext.png",
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
+                      ),
                       _buildInputField(
                           "Display Name", TextInputType.text, nameController),
                       SizedBox(

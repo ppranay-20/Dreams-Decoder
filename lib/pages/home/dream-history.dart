@@ -1,17 +1,12 @@
-import 'dart:convert';
-
 import 'package:murkaverse/pages/home/dream-table.dart';
+import 'package:murkaverse/pages/profile/profile-page.dart';
 import 'package:murkaverse/providers/chat-provider.dart';
 import 'package:murkaverse/providers/user-provider.dart';
-import 'package:murkaverse/utils/convert-to-uri.dart';
-import 'package:murkaverse/utils/getIdFromJWT.dart';
 import 'package:murkaverse/pages/chat/chat.dart';
-import 'package:murkaverse/utils/getUserData.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:murkaverse/widgets/dreams-card.dart';
 import 'package:murkaverse/widgets/updgrade-subscription.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class DreamHistory extends StatefulWidget {
@@ -22,44 +17,38 @@ class DreamHistory extends StatefulWidget {
 }
 
 class _DreamHistoryState extends State<DreamHistory> {
-  bool isLoading = true;
-  List<dynamic> chats = [];
   DateTime? selectedDate;
-  Map<DateTime, List<dynamic>> events = {};
-  double profileCompletion = 0.0;
+  DateTime? currentMonth;
+  bool createNewChatLoading = false;
 
   @override
   void initState() {
     super.initState();
-    getAllChats();
+    currentMonth = DateTime.now();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<ChatProvider>(context, listen: false).getAllChats();
+      }
+    });
   }
 
-  void getAllChats() async {
-    final customerId = await getIdFromJWT();
-    try {
-      final url = getAPIUrl('chat/user/$customerId');
-
-      final response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        List<dynamic> sortedChats = List.from(data['data']);
-        sortedChats.sort((a, b) {
-          DateTime dateA = DateTime.parse(a['created_at']);
-          DateTime dateB = DateTime.parse(b['created_at']);
-          return dateB.compareTo(dateA);
-        });
-
-        setState(() {
-          isLoading = false;
-          chats = sortedChats;
-          events = _groupChatsByDate(sortedChats);
-        });
-      }
-    } catch (e) {
-      debugPrint("An error occured $e");
-    }
+  // Helper method to get month name from month number
+  String _getMonthName(int month) {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    return monthNames[month - 1];
   }
 
   void createNewChat() async {
@@ -77,10 +66,24 @@ class _DreamHistoryState extends State<DreamHistory> {
       return;
     }
 
+    bool isPrevChatClosed = chatProvider.chats[0]['status'] != 'closed';
+
+    if (isPrevChatClosed) {
+      showErrorSnackBar(context, "Please close the previous chat");
+      return;
+    }
+
+    setState(() {
+      createNewChatLoading = true;
+    });
+
     final chat = await chatProvider.createNewChat();
 
     if (chat != null) {
       if (!mounted) return;
+      setState(() {
+        createNewChatLoading = false;
+      });
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -91,27 +94,8 @@ class _DreamHistoryState extends State<DreamHistory> {
           ),
         ),
       );
-      getAllChats();
+      chatProvider.refreshChats();
     }
-  }
-
-  Map<DateTime, List<dynamic>> _groupChatsByDate(List<dynamic> chats) {
-    Map<DateTime, List<dynamic>> groupedEvents = {};
-
-    for (var chat in chats) {
-      final rawDate = chat['chat_open'];
-      DateTime parsedDate = DateTime.parse(rawDate);
-      DateTime normalizedDate =
-          DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-
-      if (groupedEvents.containsKey(normalizedDate)) {
-        groupedEvents[normalizedDate]!.add(chat);
-      } else {
-        groupedEvents[normalizedDate] = [chat];
-      }
-    }
-
-    return groupedEvents;
   }
 
   void navigateToChat(Map<String, dynamic> chat) async {
@@ -134,27 +118,20 @@ class _DreamHistoryState extends State<DreamHistory> {
             charLimit: charLimit,
           ),
         ));
-
-    // Refresh the chat list after returning
-    getAllChats();
   }
 
   List<dynamic> getFilteredChats() {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    final chats = chatProvider.chats;
     if (selectedDate != null) {
-      return events[selectedDate] ?? [];
+      return chatProvider.events[selectedDate] ?? [];
     } else {
-      return chats;
-    }
-  }
-
-  Future<void> getProfileCompletion() async {
-    try {
-      final userData = await getUserData();
-      setState(() {
-        profileCompletion = calculateProfileCompletion(userData);
-      });
-    } catch (e) {
-      debugPrint("Error fetching profile: $e");
+      DateTime filterMonth = currentMonth ?? DateTime.now();
+      return chats.where((chat) {
+        DateTime chatDate = DateTime.parse(chat['chat_open']);
+        return chatDate.month == filterMonth.month &&
+            chatDate.year == filterMonth.year;
+      }).toList();
     }
   }
 
@@ -172,25 +149,38 @@ class _DreamHistoryState extends State<DreamHistory> {
     }
   }
 
-  double calculateProfileCompletion(Map<String, dynamic> profile) {
+  void onMonthChanged(DateTime date) {
+    setState(() {
+      currentMonth = DateTime(date.year, date.month, 1);
+      selectedDate = null;
+    });
+  }
+
+  bool calculateProfileCompletion(Map<String, dynamic> profile) {
     int totalFields = 5;
     int filledFields = 0;
 
     if (profile['name'] != null && profile['name'].isNotEmpty) filledFields++;
     if (profile['age'] != null) filledFields++;
-    if (profile['gender'] != null && profile['gender'].isNotEmpty)
+    if (profile['gender'] != null && profile['gender'].isNotEmpty) {
       filledFields++;
-    if (profile['occupation'] != null && profile['occupation'].isNotEmpty)
+    }
+    if (profile['occupation'] != null && profile['occupation'].isNotEmpty) {
       filledFields++;
+    }
     if (profile['cultural_group'] != null &&
-        profile['cultural_group'].isNotEmpty) filledFields++;
+        profile['cultural_group'].isNotEmpty) {
+      filledFields++;
+    }
 
-    return filledFields / totalFields;
+    return filledFields == totalFields;
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredChats = getFilteredChats();
+    String monthYearText = currentMonth != null
+        ? "${_getMonthName(currentMonth!.month)} ${currentMonth!.year}"
+        : "";
 
     return Scaffold(
       body: SafeArea(
@@ -218,7 +208,7 @@ class _DreamHistoryState extends State<DreamHistory> {
               ),
               SizedBox(height: 24),
               Container(
-                  padding: EdgeInsets.all(12),
+                  padding: EdgeInsets.fromLTRB(12, 12, 0, 0),
                   decoration: BoxDecoration(
                     color: Color(0xFF301530), // Semi-transparent background
                     borderRadius:
@@ -235,47 +225,70 @@ class _DreamHistoryState extends State<DreamHistory> {
                             children: [
                               Consumer<UserProvider>(
                                 builder: (context, userProvider, child) {
-                                  final messageLimit = userProvider
-                                          .userData?['message_limit']
-                                          .toString() ??
-                                      "null";
+                                  final messageLimit =
+                                      userProvider.userData?['message_limit'] ??
+                                          "null";
 
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      "Messages left: $messageLimit",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10),
-                                    ),
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: 30,
+                                        width: 150,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          color: Color(0xFF4A1D4A),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 20, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: Color(0xFFE361CF),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                messageLimit.toString(),
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    EdgeInsets.only(right: 20),
+                                                child: Text(
+                                                  "FILL UP",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
+                                                  ),
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        "$messageLimit messages are left",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   );
                                 },
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              DecoratedBox(
-                                decoration: BoxDecoration(
-                                    border: Border.all(),
-                                    color: Colors.white30,
-                                    shape: BoxShape.circle),
-                                child: GestureDetector(
-                                  onTap: () => createNewChat(),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 6.0),
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -292,12 +305,15 @@ class _DreamHistoryState extends State<DreamHistory> {
                             onTap: () {
                               showPaymentDialog(context);
                             },
-                            child: Text(
-                              "Click here to top-up your plan",
-                              style: TextStyle(
-                                color: Color(0xFF699DFF),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Text(
+                                "Click here to top-up your plan",
+                                style: TextStyle(
+                                  color: Color(0xFF699DFF),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
@@ -306,48 +322,136 @@ class _DreamHistoryState extends State<DreamHistory> {
                       SizedBox(width: 20),
                       Image.asset(
                         'assets/cat2.png',
-                        width: 150,
-                        height: 120,
+                        fit: BoxFit.contain,
                       ),
                     ],
                   )),
               SizedBox(
                 height: 20,
               ),
+              SizedBox(
+                child: Consumer<UserProvider>(
+                  builder: (context, userProvider, child) {
+                    final userData = userProvider.userData;
+                    final isProfileCompleted =
+                        calculateProfileCompletion(userData ?? {});
+                    return Container(
+                        child: isProfileCompleted || userProvider.isLoading
+                            ? null
+                            : GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ProfilePage()));
+                                },
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF301530),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 10, horizontal: 10),
+                                              decoration: BoxDecoration(
+                                                color: Color(0xFFF5E2FD),
+                                                borderRadius: BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(10),
+                                                    bottomLeft:
+                                                        Radius.circular(10)),
+                                              ),
+                                              child: Icon(
+                                                Icons.notifications,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 10),
+                                                child: Text(
+                                                  "Click here to finish completing your profile information!",
+                                                  style: TextStyle(
+                                                      color: Color(0xFFF5E2FD),
+                                                      fontSize: 14),
+                                                  overflow:
+                                                      TextOverflow.visible,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                  ],
+                                ),
+                              ));
+                  },
+                ),
+              ),
               Expanded(
                 child: ListView(
                   children: [
                     // Dreams table section
                     DreamsTable(
-                      events: events,
+                      events: Provider.of<ChatProvider>(context, listen: false)
+                          .events,
                       onDateSelected: onDateSelected,
+                      onMonthChanged: onMonthChanged,
+                      createNewChat: createNewChat,
+                      createNewChatLoading: createNewChatLoading,
+                    ),
+
+                    SizedBox(height: 12),
+                    Text(
+                      "My Dreams in $monthYearText:",
+                      style: TextStyle(
+                          color: Color(0xFFF5E2FD),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
                     ),
 
                     SizedBox(height: 20),
 
                     // Chat list section
-                    isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : filteredChats.isEmpty
-                            ? Center(
-                                child: Text(
-                                  selectedDate != null
-                                      ? "No dreams for this date"
-                                      : "No dreams found",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              )
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: filteredChats.length,
-                                itemBuilder: (context, index) {
-                                  final chat = filteredChats[index];
-                                  return DreamCard(
-                                      chat: chat,
-                                      navigateToChat: navigateToChat);
-                                },
-                              ),
+                    Consumer<ChatProvider>(
+                        builder: (context, chatProvider, child) {
+                      final filteredChats = getFilteredChats();
+
+                      return chatProvider.isLoadingChats
+                          ? Center(child: CircularProgressIndicator())
+                          : filteredChats.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    selectedDate != null
+                                        ? "No dreams for this date"
+                                        : "No dreams found for this month",
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: filteredChats.length,
+                                  itemBuilder: (context, index) {
+                                    final chat = filteredChats[index];
+                                    return DreamCard(
+                                        chat: chat,
+                                        navigateToChat: navigateToChat);
+                                  });
+                    })
                   ],
                 ),
               )

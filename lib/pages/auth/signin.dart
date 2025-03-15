@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:murkaverse/pages/auth/signup.dart';
+import 'package:murkaverse/providers/user-provider.dart';
 import 'package:murkaverse/utils/convert-to-uri.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:murkaverse/widgets/buttons.dart';
@@ -8,6 +9,7 @@ import 'package:murkaverse/widgets/main-screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class Signin extends StatefulWidget {
   const Signin({super.key});
@@ -62,6 +64,7 @@ class _SigninState extends State<Signin> {
         final data = jsonDecode(response.body);
         final token = data['token'];
         await storage.write(key: 'token', value: token);
+        Provider.of<UserProvider>(context, listen: false).getUserData();
         showSuccessSnackbar(context, "Login Successful");
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => MainScreen()));

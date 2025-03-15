@@ -82,6 +82,7 @@ class _ProfileState extends State<Profile> {
 
   signOut() async {
     await storage.delete(key: 'token');
+    if (!mounted) return;
     showSuccessSnackbar(context, "Logged out successfully");
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => LoggedOut()));

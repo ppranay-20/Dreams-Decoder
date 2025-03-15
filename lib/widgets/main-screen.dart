@@ -76,10 +76,14 @@ class _MainScreenState extends State<MainScreen> {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    if (userProvider.isLoading || chatProvider.isLoading) return;
+    if (!chatProvider.hasActiveChat) {
+      showErrorSnackBar(context, "Select a dream or add new dream");
+      return;
+    }
 
-    final messageLimit = userProvider.userData?['message_limit'] as int? ?? 0;
-    final charLimit = userProvider.userData?['character_limit'] as int? ?? 0;
+    final chat = chatProvider.currentChat;
+    final messageLimit = userProvider.userData?['message_limit'] as int;
+    final charLimit = userProvider.userData?['character_limit'] as int;
 
     if (messageLimit <= 0) {
       showErrorSnackBar(
@@ -87,25 +91,17 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    if (chatProvider.hasActiveChat) {
-      setState(() {
-        _currentIndex = 1;
-        _pages[1] = ChatPage(
-            chat: chatProvider.currentChat!,
-            messageLimit: messageLimit,
-            charLimit: charLimit);
-      });
-    } else {
-      final newChat = await chatProvider.createNewChat();
-      if (newChat != null) {
-        setState(() {
-          _currentIndex = 1;
-          _pages[1] = ChatPage(
-              chat: newChat, messageLimit: messageLimit, charLimit: charLimit);
-        });
-      } else {
-        showErrorSnackBar(context, "Failed to create a new chat.");
-      }
-    }
+    if (chatProvider.isLoading) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage(
+          chat: chat!,
+          messageLimit: messageLimit,
+          charLimit: charLimit,
+        ),
+      ),
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:murkaverse/pages/auth/signin.dart';
+import 'package:murkaverse/pages/profile/profile-page.dart';
 import 'package:murkaverse/utils/convert-to-uri.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:murkaverse/widgets/buttons.dart';
@@ -55,9 +56,17 @@ class _SignupState extends State<Signup> {
               {'name': username, 'email': email, 'password': password}));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final id = data['data']['id'];
+        final name = data['data']['name'];
+        final password = data['data']['password'];
+        if (!mounted) return;
         showSuccessSnackbar(context, "Signup successful!");
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Signin()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => ProfilePage(
+                    id: id.toString(), name: name, password: password)));
       } else {
         debugPrint("Error: ${response.statusCode} - ${response.body}");
         showAlertDialog("Signup failed: ${response.body}");

@@ -53,6 +53,11 @@ class _ChatPageState extends State<ChatPage> {
     if (userText.isEmpty) return;
     var uuid = Uuid();
 
+    if (messageLimit <= 0) {
+      showErrorSnackBar(context, "You have reached the message limit");
+      return;
+    }
+
     Map<String, String> messagePayload = {
       "id": uuid.v4(),
       "chat_id": widget.chat['id'],
@@ -84,6 +89,7 @@ class _ChatPageState extends State<ChatPage> {
 
         if (context.mounted) {
           await Provider.of<UserProvider>(context, listen: false).getUserData();
+          Provider.of<ChatProvider>(context, listen: false).refreshChats();
         }
       }
     } catch (e) {
@@ -156,10 +162,12 @@ class _ChatPageState extends State<ChatPage> {
               color: Color(0xFFE152C2),
               size: 20,
             ),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MainScreen()));
-            },
+            onPressed: _isLoading
+                ? null
+                : () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MainScreen()));
+                  },
           ),
         ),
         title: Text(
@@ -172,7 +180,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 5),
+              padding: EdgeInsets.only(left: 5, right: 5, top: 20),
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 bool isUser = messages[index]["sent_by"] == "user";
@@ -181,62 +189,67 @@ class _ChatPageState extends State<ChatPage> {
                 if (isFirstMessage) {
                   return Column(
                     children: [
-                      Container(
+                      SizedBox(
                         width: double.infinity,
-                        height: 150, // Fixed height container to hold the stack
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Cat image positioned above the message
-                            Positioned(
-                              top: -12,
-                              right: 0,
-                              child: Image.asset(
-                                "assets/cat3.png",
-                                width: 120,
-                                height: 120,
-                              ),
-                            ),
-                            // Message with star icon
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 8, top: 5),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF301530),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    width: 30,
-                                    height: 30,
-                                    child: Icon(Icons.star,
-                                        color: Color(0xFFE152C2)),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final screenWidth = constraints.maxWidth;
+                            final catWidth = screenWidth * 0.3;
+                            final catHeight = catWidth;
+
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Positioned(
+                                  top: -catHeight * 0.35,
+                                  right: 0,
+                                  child: Image.asset(
+                                    "assets/cat3.png",
+                                    width: catWidth,
+                                    height: catHeight,
+                                    fit: BoxFit.contain,
                                   ),
-                                  Expanded(
-                                    child: Container(
-                                      margin: EdgeInsets.only(top: 0),
-                                      padding: EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF301530),
-                                        borderRadius: BorderRadius.circular(15),
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      top: catHeight * 0.4, bottom: 10),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        margin:
+                                            EdgeInsets.only(right: 8, top: 5),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF301530),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        width: 30,
+                                        height: 30,
+                                        child: Icon(Icons.star,
+                                            color: Color(0xFFE152C2)),
                                       ),
-                                      child: Text(
-                                        messages[index]["content"]!,
-                                        style:
-                                            TextStyle(color: Color(0xFFDFBAEF)),
+                                      Expanded(
+                                        child: Container(
+                                          padding: EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFF301530),
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          child: Text(
+                                            messages[index]["content"]!,
+                                            style: TextStyle(
+                                                color: Color(0xFFDFBAEF)),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  SizedBox(
-                                      width: 20), // Space for the cat image
-                                ],
-                              ),
-                            ),
-                          ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -286,7 +299,9 @@ class _ChatPageState extends State<ChatPage> {
                                         : Color(0xFFDFBAEF)),
                               ),
                             ),
-                            if (index == messages.length - 1 && status)
+                            if (index == messages.length - 1 &&
+                                status &&
+                                !isUser)
                               Padding(
                                 padding: EdgeInsets.only(top: 10),
                                 child:
@@ -320,6 +335,11 @@ class _ChatPageState extends State<ChatPage> {
                             children: [
                               TextField(
                                 controller: _messageController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    setState(() {});
+                                  });
+                                },
                                 style: TextStyle(color: Colors.white),
                                 maxLength:
                                     charaterLimit, // Add this to limit text input
@@ -332,7 +352,11 @@ class _ChatPageState extends State<ChatPage> {
                                     borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide.none,
                                   ),
-                                  counterText: "", // Hide the default counter
+                                  counterText: _messageController.text.length >=
+                                          charaterLimit
+                                      ? "You have reached the charater limit of $charaterLimit"
+                                      : "",
+                                  counterStyle: TextStyle(color: Colors.red),
                                 ),
                               ),
                             ],

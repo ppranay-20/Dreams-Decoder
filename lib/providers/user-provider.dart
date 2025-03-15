@@ -12,6 +12,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> getUserData() async {
     try {
       isLoading = true;
+      notifyListeners();
       final id = await getIdFromJWT();
       final url = getAPIUrl('users/$id');
       final response =

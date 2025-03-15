@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DreamsTable extends StatefulWidget {
   final Map<DateTime, List<dynamic>> events;
   final Function(DateTime) onDateSelected;
+  final Function(DateTime) onMonthChanged;
+  final Function() createNewChat;
+  final bool createNewChatLoading;
 
   const DreamsTable({
     super.key,
     required this.events,
     required this.onDateSelected,
+    required this.onMonthChanged,
+    required this.createNewChat,
+    required this.createNewChatLoading,
   });
 
   @override
@@ -18,6 +25,13 @@ class DreamsTable extends StatefulWidget {
 class _DreamsTableState extends State<DreamsTable> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with current month filter
+    Future.microtask(() => widget.onMonthChanged(_focusedDay));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +69,19 @@ class _DreamsTableState extends State<DreamsTable> {
                 }
               });
             },
+            onPageChanged: (focusedDay) => {
+              setState(() {
+                _focusedDay = focusedDay;
+              }),
+              widget.onMonthChanged(focusedDay),
+              if (_selectedDay != null)
+                {
+                  setState(() {
+                    _selectedDay = null;
+                  }),
+                  widget.onDateSelected(DateTime(0)),
+                }
+            },
             headerStyle: HeaderStyle(
                 titleTextStyle: TextStyle(
                   color: Colors.white,
@@ -67,6 +94,56 @@ class _DreamsTableState extends State<DreamsTable> {
                     Icon(Icons.chevron_right, color: Colors.white70),
                 formatButtonVisible: false,
                 titleCentered: true),
+            calendarBuilders: CalendarBuilders(
+              headerTitleBuilder: (context, day) {
+                return Row(
+                  children: [
+                    Text(
+                      DateFormat.yMMMM().format(day),
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                    Spacer(),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF301530),
+                            Color.fromARGB(255, 222, 16, 177),
+                          ],
+                        ),
+                        border: Border.all(color: Color(0xFFE152C2)),
+                      ),
+                      child: GestureDetector(
+                        onTap: widget.createNewChatLoading
+                            ? null
+                            : () => widget.createNewChat(),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 10,
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              "Add a dream",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
             calendarStyle: CalendarStyle(
               weekendTextStyle: TextStyle(color: Colors.white70),
               defaultTextStyle: TextStyle(color: Colors.white),
