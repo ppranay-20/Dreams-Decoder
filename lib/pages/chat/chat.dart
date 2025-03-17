@@ -146,20 +146,20 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: Color(0xFF180E18),
+        backgroundColor: Color(0xFF180C12),
         leading: Container(
           margin: EdgeInsets.only(left: 10, top: 10, bottom: 10),
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Color(0xFF301530),
+            color: Color(0xFF330E22),
             shape: BoxShape.circle,
           ),
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: Icon(
-              Icons.arrow_back,
-              color: Color(0xFFE152C2),
+              Icons.arrow_back_ios_new,
+              color: Color(0xFFDD4594),
               size: 20,
             ),
             onPressed: _isLoading
@@ -226,14 +226,18 @@ class _ChatPageState extends State<ChatPage> {
                                         ),
                                         width: 30,
                                         height: 30,
-                                        child: Icon(Icons.star,
-                                            color: Color(0xFFE152C2)),
+                                        child: Image.asset(
+                                          "assets/chat_cat.png",
+                                          width: 30,
+                                          height: 30,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                       Expanded(
                                         child: Container(
                                           padding: EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: Color(0xFF301530),
+                                            color: Color(0xFF330E22),
                                             borderRadius:
                                                 BorderRadius.circular(15),
                                           ),
@@ -269,12 +273,17 @@ class _ChatPageState extends State<ChatPage> {
                           Container(
                             margin: EdgeInsets.only(right: 8, top: 5),
                             decoration: BoxDecoration(
-                              color: Color(0xFF301530),
+                              color: Color(0xFF330E22),
                               shape: BoxShape.circle,
                             ),
                             width: 30,
                             height: 30,
-                            child: Icon(Icons.star, color: Color(0xFFE152C2)),
+                            child: Image.asset(
+                              "assets/chat_cat.png",
+                              width: 30,
+                              height: 30,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         Column(
                           children: [
@@ -287,15 +296,15 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               decoration: BoxDecoration(
                                 color: isUser
-                                    ? Color(0xFF101D3C)
-                                    : Color(0xFF301530),
+                                    ? Color(0xFF051D2D)
+                                    : Color(0xFF330E22),
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: Text(
                                 messages[index]["content"]!,
                                 style: TextStyle(
                                     color: isUser
-                                        ? Color(0xFF8EABED)
+                                        ? Color(0xFFA0DBFF)
                                         : Color(0xFFDFBAEF)),
                               ),
                             ),
@@ -345,12 +354,13 @@ class _ChatPageState extends State<ChatPage> {
                                     charaterLimit, // Add this to limit text input
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Color(0xFF101D3C),
-                                  hintText: "Type a message...",
+                                  fillColor: Color(0xFF051D2D),
+                                  hintText: "Message",
                                   hintStyle: TextStyle(color: Colors.white70),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
-                                    borderSide: BorderSide.none,
+                                    borderSide:
+                                        BorderSide(color: Color(0xFF1972A9)),
                                   ),
                                   counterText: _messageController.text.length >=
                                           charaterLimit
@@ -365,7 +375,7 @@ class _ChatPageState extends State<ChatPage> {
                         SizedBox(width: 10),
                         FloatingActionButton(
                           onPressed: _isLoading ? null : sendMessage,
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Color(0xFF1972A9),
                           shape: CircleBorder(),
                           child: _isLoading
                               ? SizedBox(

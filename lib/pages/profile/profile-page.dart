@@ -35,20 +35,23 @@ Widget _buildInputField(
       keyboardType: type,
       style: TextStyle(color: Color(0xFFDFBAEF), fontSize: 15),
       decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+          contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 18),
           filled: true,
-          fillColor: Color(0xFF301530),
+          fillColor: Color(0xFF330E22),
           hintText: displayName,
-          hintStyle: TextStyle(fontSize: 15, color: Color(0xFFDFBAEF)),
+          hintStyle: TextStyle(fontSize: 15, color: Color(0xFFDD4594)),
           border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFF301530))),
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.transparent)),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.transparent)),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFF301530))),
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.transparent)),
           disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFF301530)))),
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: Colors.transparent))),
     ),
   ]);
 }
@@ -68,14 +71,26 @@ Widget _buildDropdown(String displayName, List<String> dropdownItems,
       ),
       DropdownButtonFormField(
         value: initialValue,
-        dropdownColor: Color(0xFF301530),
-        hint: Text(displayName, style: TextStyle(color: Color(0xFFDFBAEF))),
+        dropdownColor: Color(0xFF330E22),
+        hint: Text(displayName, style: TextStyle(color: Color(0xFFDD4594))),
         decoration: InputDecoration(
           filled: true,
-          fillColor: Color(0xFF301530),
+          fillColor: Color(0xFF330E22),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Color(0xFF301530)),
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.transparent),
           ),
         ),
         items: dropdownItems.map((String item) {
@@ -201,46 +216,45 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF180C12),
       body: Padding(
         padding: EdgeInsets.fromLTRB(15, 50, 15, 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             isToken
-                ? Container(
-                    child: Row(
-                      children: [
-                        Container(
-                          margin:
-                              EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF301530),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFFE152C2),
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
+                ? Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 10, bottom: 10),
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF330E22),
+                          shape: BoxShape.circle,
                         ),
-                        SizedBox(
-                          width: 10,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Color(0xFFDD4594),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         ),
-                        Text("Profile",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text("Profile",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.4)),
+                    ],
                   )
                 : Container(
                     width: MediaQuery.of(context).size.width * 0.6,
@@ -339,26 +353,29 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : updateDetails,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE152C2),
-                  disabledBackgroundColor: Color(0xFFE152C2),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : updateDetails,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFDD4594),
+                    disabledBackgroundColor: Color(0xFFDD4594),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
+                  child: isLoading
+                      ? SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : Text("Save & Continue",
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
-                child: isLoading
-                    ? SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
-                        ),
-                      )
-                    : Text("Save & Continue",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             )
           ],

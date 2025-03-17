@@ -27,7 +27,7 @@ class _InitialPageState extends State<InitialPage> {
         child: Image.asset(
           'assets/logo.png',
           fit: BoxFit.contain,
-          width: MediaQuery.of(context).size.width * 0.7,
+          width: MediaQuery.of(context).size.width * 0.4,
         ),
       ),
     );

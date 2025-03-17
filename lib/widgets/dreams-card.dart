@@ -23,8 +23,8 @@ class DreamCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
-          border: Border.all(color: Color(0xFF733683), width: 1),
-          color: Color(0xFF160816),
+          border: Border.all(color: Color(0xFF8B2359), width: 1),
+          color: Color(0xFF180C12),
           borderRadius: BorderRadius.circular(12),
         ),
         // Use IntrinsicHeight to ensure both sides have the same height
@@ -58,7 +58,7 @@ class DreamCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
                         color:
-                            Color(0xFF733683), // Darker purple for top section
+                            Color(0xFF8B2359), // Darker purple for top section
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(11),
                         ),
@@ -67,9 +67,10 @@ class DreamCard extends StatelessWidget {
                         child: Text(
                           date,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF180C12),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.15,
                           ),
                         ),
                       ),
@@ -80,7 +81,7 @@ class DreamCard extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: Color(
-                              0xFF3D1F3D), // Lighter purple for bottom section
+                              0xFF330E22), // Lighter purple for bottom section
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(11),
                           ),
@@ -97,8 +98,9 @@ class DreamCard extends StatelessWidget {
                                   Text(
                                     "Full chat >",
                                     style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                      color: Color(0xFFDD4594),
+                                      fontSize: 12,
+                                      letterSpacing: -0.15,
                                     ),
                                   ),
                                 ],

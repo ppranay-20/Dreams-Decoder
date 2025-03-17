@@ -38,8 +38,8 @@ class _MainScreenState extends State<MainScreen> {
       body: _pages[_currentIndex], // Show the selected page
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF160816),
-        selectedItemColor: Color(0xFFE361CF),
-        unselectedItemColor: Colors.white54,
+        selectedItemColor: Color(0xFFDD4594),
+        unselectedItemColor: Colors.white60,
         currentIndex: _currentIndex,
         onTap: (index) {
           // If selecting the chat tab (index 1)

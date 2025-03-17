@@ -1,6 +1,5 @@
 import 'package:murkaverse/pages/auth/signin.dart';
 import 'package:murkaverse/pages/auth/signup.dart';
-import 'package:murkaverse/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 
 class LoggedOut extends StatefulWidget {
@@ -19,77 +18,134 @@ class _LoggedOutState extends State<LoggedOut> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              "assets/cat.png",
+              "assets/bg_image.png",
               fit: BoxFit.cover,
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(20, 60, 20, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          "assets/logo.png",
-                          fit: BoxFit.contain,
-                          width: 300,
-                        ),
-                        SizedBox(height: 40),
-                        Text(
-                          "Hey there, dreamer! I'm Murka, your feline guide to the mystical world of dreams. Are you ready to explore the secrets of your nighttime adventures?",
-                          style: TextStyle(fontSize: 15, color: Colors.white),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          "With Murkaverse, we'll decode hidden messages and unravel mysteries.",
-                          style: TextStyle(fontSize: 15, color: Colors.white),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          "Let's dive into the dreamscape and see what amazing stories await!",
-                          style: TextStyle(fontSize: 15, color: Colors.white),
-                        ),
-                      ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(0, 60, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              "assets/logo.png",
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width * 0.4,
+                            ),
+                          ),
+                          SizedBox(height: 40),
+                          Text(
+                            "Hey there, dreamer!",
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontStyle: FontStyle.italic,
+                              fontFamily: 'Mini',
+                            ),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            "I'm Murka, your feline guide to the mystical world of dreams. Are you ready to explore the secrets of your nighttime adventures?",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            "With Murkaverse, we'll decode hidden messages and unravel mysteries.",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            "Let's dive into the dreamscape and see what amazing stories await!",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 40),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Button(
-                        color: Color(0xFFE152C2),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Signup()));
-                        },
-                        child: Text("Register",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 18)),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 50),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Signin()));
+                              },
+                              child: Text("Sign In",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFFDD4594),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Signup()));
+                              },
+                              child: Text("Register",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 10),
-                      Button(
-                        color: Colors.white,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Signin()));
-                        },
-                        child: Text("Sign In",
-                            style:
-                                TextStyle(color: Colors.black, fontSize: 18)),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

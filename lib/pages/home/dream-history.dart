@@ -84,6 +84,7 @@ class _DreamHistoryState extends State<DreamHistory> {
       setState(() {
         createNewChatLoading = false;
       });
+      chatProvider.refreshChats();
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -94,7 +95,6 @@ class _DreamHistoryState extends State<DreamHistory> {
           ),
         ),
       );
-      chatProvider.refreshChats();
     }
   }
 
@@ -203,14 +203,15 @@ class _DreamHistoryState extends State<DreamHistory> {
                 "The hidden potential in dreams.",
                 style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFFF5E2FD),
-                    fontWeight: FontWeight.w500),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.4),
               ),
               SizedBox(height: 24),
               Container(
                   padding: EdgeInsets.fromLTRB(12, 12, 0, 0),
                   decoration: BoxDecoration(
-                    color: Color(0xFF301530), // Semi-transparent background
+                    color: Color(0xFF330E22), // Semi-transparent background
                     borderRadius:
                         BorderRadius.circular(10), // Optional rounded corners
                   ),
@@ -228,18 +229,43 @@ class _DreamHistoryState extends State<DreamHistory> {
                                   final messageLimit =
                                       userProvider.userData?['message_limit'] ??
                                           "null";
-
                                   return Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Container(
                                         height: 30,
-                                        width: 150,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.45,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(20),
-                                          color: Color(0xFF4A1D4A),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Color(
+                                                  0xFF4A1D4A), // Dark purple-pink at top
+                                              Color(0xFF2D0B2D), // Mid purple
+                                              Color(
+                                                  0xFF1A061A), // Darker purple
+                                              Color(
+                                                  0xFF2D0B2D), // Returns to mid purple
+                                              Color(
+                                                  0xFF380D38), // Slightly lighter purple at bottom
+                                            ],
+                                            stops: [0.0, 0.3, 0.5, 0.7, 1.0],
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color(0xFFDD4594),
+                                              blurRadius: 5,
+                                              spreadRadius: 0,
+                                              offset: Offset(0, 0),
+                                            ),
+                                          ],
                                         ),
                                         child: Row(
                                           children: [
@@ -247,7 +273,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 20, vertical: 5),
                                               decoration: BoxDecoration(
-                                                color: Color(0xFFE361CF),
+                                                color: Color(0xFFDD4594),
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                               ),
@@ -268,22 +294,15 @@ class _DreamHistoryState extends State<DreamHistory> {
                                                   "FILL UP",
                                                   style: TextStyle(
                                                     color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 11,
+                                                    letterSpacing: 1.1,
                                                   ),
-                                                  textAlign: TextAlign.right,
+                                                  textAlign: TextAlign.center,
                                                 ),
                                               ),
                                             ),
                                           ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        "$messageLimit messages are left",
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
@@ -321,7 +340,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                       ),
                       SizedBox(width: 20),
                       Image.asset(
-                        'assets/cat2.png',
+                        'assets/cat.png',
                         fit: BoxFit.contain,
                       ),
                     ],
@@ -415,12 +434,31 @@ class _DreamHistoryState extends State<DreamHistory> {
                     ),
 
                     SizedBox(height: 12),
-                    Text(
-                      "My Dreams in $monthYearText:",
-                      style: TextStyle(
-                          color: Color(0xFFF5E2FD),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          color: Color(0xFFDD4594),
+                          shadows: [
+                            Shadow(
+                              color: Color(0xFF2D0B2D),
+                              blurRadius: 5,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
+                          size: 12,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          "My Dreams in $monthYearText:",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: 20),

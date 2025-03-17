@@ -39,7 +39,7 @@ class _DreamsTableState extends State<DreamsTable> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Color(0xFF301530),
+            color: Color(0xFF330E22),
             borderRadius: BorderRadius.circular(12),
           ),
           child: TableCalendar(
@@ -105,16 +105,24 @@ class _DreamsTableState extends State<DreamsTable> {
                     Spacer(),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 4),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(5),
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFF301530),
+                            Color(0xFF330E22),
                             Color.fromARGB(255, 222, 16, 177),
                           ],
                         ),
                         border: Border.all(color: Color(0xFFE152C2)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFFE152C2),
+                            blurRadius: 5,
+                            spreadRadius: 0,
+                            offset: Offset(0, 0),
+                          ),
+                        ],
                       ),
                       child: GestureDetector(
                         onTap: widget.createNewChatLoading
@@ -126,7 +134,7 @@ class _DreamsTableState extends State<DreamsTable> {
                             Icon(
                               Icons.add,
                               color: Colors.white,
-                              size: 10,
+                              size: 12,
                             ),
                             SizedBox(width: 5),
                             Text(
@@ -134,6 +142,7 @@ class _DreamsTableState extends State<DreamsTable> {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],

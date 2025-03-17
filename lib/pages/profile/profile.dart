@@ -20,7 +20,7 @@ Widget profileOption(IconData icon, String title, String description,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
       side: BorderSide(
-        color: Color(0xFF592B65),
+        color: Color(0xFF8B2359),
         width: 1.0,
       ),
     ),
@@ -30,14 +30,14 @@ Widget profileOption(IconData icon, String title, String description,
         width: 60,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: Color(0xFF301530),
+          color: Color(0xFF330E22),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(12),
             bottomLeft: Radius.circular(12),
           ),
         ),
         child: Center(
-          child: Icon(icon, color: Color(0xFFDEB9ED), size: 24),
+          child: Icon(icon, color: Colors.white, size: 24),
         ),
       ),
       title: Padding(
@@ -48,16 +48,18 @@ Widget profileOption(IconData icon, String title, String description,
             Text(
               title,
               style: TextStyle(
-                color: Color(0xFFF5E2FD),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                letterSpacing: -0.15,
               ),
             ),
             Text(
               description,
               style: TextStyle(
-                color: Color(0xFFF5E2FD).withOpacity(0.7),
-                fontSize: 12,
+                color: Colors.white,
+                fontSize: 14,
+                letterSpacing: 0.2,
               ),
             ),
           ],
@@ -91,20 +93,16 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 50,
-        backgroundColor: Color(0xFF180E18),
-        title: Text("Profile",
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 26,
-                fontWeight: FontWeight.bold)),
-      ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text("Settings",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold)),
             SizedBox(
               height: 20,
             ),
@@ -138,7 +136,7 @@ class _ProfileState extends State<Profile> {
               child: Ink(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Color(0xFF101D3C)),
+                    color: Color(0xFF051D2D)),
                 child: Container(
                   height: 60, // Match image height
                   constraints: BoxConstraints(minWidth: double.infinity),
@@ -149,7 +147,7 @@ class _ProfileState extends State<Profile> {
                         width: 60, // Square left section
                         height: 60,
                         decoration: BoxDecoration(
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF1972A9),
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(12),
                             bottomLeft: Radius.circular(12),

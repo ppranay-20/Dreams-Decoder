@@ -9,14 +9,32 @@ Widget buildChatCreditsBar(int messageLimit, VoidCallback endChat) {
         width: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Color(0xFF4A1D4A),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF4A1D4A), // Dark purple-pink at top
+              Color(0xFF2D0B2D), // Mid purple
+              Color(0xFF1A061A), // Darker purple
+              Color(0xFF2D0B2D), // Returns to mid purple
+              Color(0xFF380D38), // Slightly lighter purple at bottom
+            ],
+            stops: [0.0, 0.3, 0.5, 0.7, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFFE361CF),
+              blurRadius: 6,
+              offset: Offset(0, 0),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               decoration: BoxDecoration(
-                color: Color(0xFFE361CF),
+                color: Color(0xFFDD4594),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -38,7 +56,7 @@ Widget buildChatCreditsBar(int messageLimit, VoidCallback endChat) {
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -49,9 +67,10 @@ Widget buildChatCreditsBar(int messageLimit, VoidCallback endChat) {
       Text(
         "$messageLimit messages are left",
         style: TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-        ),
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0.4),
       ),
       SizedBox(height: 8),
       GestureDetector(
@@ -61,10 +80,10 @@ Widget buildChatCreditsBar(int messageLimit, VoidCallback endChat) {
         child: Text(
           "End Chat",
           style: TextStyle(
-            color: Color(0xFF699DFF),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+              color: Color(0xFF699DFF),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.4),
         ),
       ),
     ],
