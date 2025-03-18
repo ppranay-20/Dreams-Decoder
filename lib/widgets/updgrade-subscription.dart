@@ -5,7 +5,6 @@ import 'package:murkaverse/utils/convert-to-uri.dart';
 import 'package:murkaverse/utils/getIdFromJWT.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -29,6 +28,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
   dynamic selectedPlan;
   int? amount;
   bool isPaymentLoading = false;
+  String isPlanSelected = '';
 
   @override
   void initState() {
@@ -71,14 +71,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
       showErrorSnackBar(context, "Please select a plan first");
       return;
     }
-
-    final key = dotenv.env['RAZORPAY_TEST_API_KEY'];
-
-    if (key == null || key.isEmpty) {
-      showErrorSnackBar(context, "Payment Configration Error");
-      return;
-    }
-
     setState(() {
       isPaymentLoading = true;
     });
@@ -132,112 +124,553 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    print(selectedPlan);
     return Dialog(
-      backgroundColor: Color(0xFF180E18),
-      insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          maxWidth: 320,
-          maxHeight: MediaQuery.of(context).size.height * 0.5,
-        ),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Color(0xFF180E18),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(height: 10),
-                    Text(
-                      "Add Messages to your account!",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 15),
-
-                    // Display plans from API
-                    paymentPlans.isEmpty
-                        ? Text("No plans available",
-                            style: TextStyle(color: Colors.grey))
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: paymentPlans.map<Widget>((plan) {
-                              bool isSelected = selectedPlan != null &&
-                                  selectedPlan['id'] == plan['id'];
-                              return ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isSelected
-                                      ? Color(0xFFE152C2)
-                                      : Color(0xFF101D3C),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  side: BorderSide(
-                                      color: isSelected
-                                          ? Color(0xFFE152C2)
-                                          : Color(0xFF699DFF)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    selectedPlan = plan;
-                                    amount = plan['amount'];
-                                  });
-                                },
-                                child: Text(
-                                  "+${plan['message_limit']}",
-                                  style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.red),
-                                ),
-                              );
-                            }).toList(),
+      backgroundColor: Color(0xFF180C12),
+      insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFFDD4594),
+              ),
+            )
+          : Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.9,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Spacer(),
+                      Container(
+                        alignment: Alignment.topRight,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF330E22),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Icons.close,
+                            color: Color(0xFFDD4594),
                           ),
-
-                    SizedBox(height: 10),
-                    Text(
-                      "Amount: ${amount ?? "Select a plan"}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15, color: Colors.white),
-                    ),
-                    SizedBox(height: 15),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFE152C2),
-                        disabledBackgroundColor: Color(0xFFE152C2),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 50, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: isPaymentLoading ? null : upgradeSubscription,
-                      child: isPaymentLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 1,
-                              ),
-                            )
-                          : Text("Continue",
-                              style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                  Text(
+                    "Plans and pricing",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "You’re presently enjoying a complimentary plan to delve into the meanings of your dreams with your guide, Murka. This includes 20 messages, each with a 500-character limit.",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 0.4),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF330E22),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Color(0xFF8B2359), width: 1),
                     ),
-                  ],
-                ),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFDD4594),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        "Subscription",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () => {
+                              setState(() {
+                                selectedPlan = paymentPlans[0];
+                              }),
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(15),
+                              margin: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  color: Color(0xFF330E22),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: Color(0xFF8B2359), width: 2),
+                                  boxShadow: selectedPlan == paymentPlans[0]
+                                      ? [
+                                          BoxShadow(
+                                            color: Color(0xFF8B2359),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 0),
+                                          ),
+                                        ]
+                                      : []),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF671943),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Color(0xFFDD4594),
+                                              width: 1),
+                                        ),
+                                        child: selectedPlan == paymentPlans[0]
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Color(0xFFDD4594),
+                                                size: 10,
+                                              )
+                                            : null,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        "Mild Dreamer",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "Once or twice each week, you drift into the tender embrace of the dreamworld.",
+                                    style: TextStyle(
+                                      color: Color(0xFFFFDCEE),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.04,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "100 messages per month",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "500 character limit per message",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Text(
+                                    "\$9.99 a month",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          GestureDetector(
+                            onTap: () => {
+                              setState(() {
+                                selectedPlan = paymentPlans[1];
+                              }),
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(15),
+                              margin: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF370632),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Color(0xFF970D8A), width: 2),
+                                boxShadow: selectedPlan == paymentPlans[1]
+                                    ? [
+                                        BoxShadow(
+                                          color: Color(0xFF970D8A),
+                                          blurRadius: 10,
+                                          offset: Offset(0, 0),
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF4F0948),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Color(0xFF970D8A),
+                                              width: 1),
+                                        ),
+                                        child: selectedPlan == paymentPlans[1]
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Color(0xFFE41DD1),
+                                                size: 10,
+                                              )
+                                            : null,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        "Serious Dreamer",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "Nearly every dawn, you steal into the boundless haven of slumber.",
+                                    style: TextStyle(
+                                      color: Color(0xFFFFDCEE),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.04,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "200 messages per month",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "800 character limit per message",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Text(
+                                    "\$19.99 a month",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          GestureDetector(
+                            onTap: () => {
+                              setState(() {
+                                selectedPlan = paymentPlans[2];
+                              }),
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(15),
+                              margin: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF20032F),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Color(0xFF822BAA), width: 2),
+                                boxShadow: selectedPlan == paymentPlans[2]
+                                    ? [
+                                        BoxShadow(
+                                          color: Color(0xFF822BAA),
+                                          blurRadius: 10,
+                                          offset: Offset(0, 0),
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF3D0657),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Color(0xFF822BAA),
+                                              width: 1),
+                                        ),
+                                        child: selectedPlan == paymentPlans[2]
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Color(0xFFE41DD1),
+                                                size: 10,
+                                              )
+                                            : null,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        "Unreal Dreamer",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "You dwell more deeply in the tender shadows of repose than in the bright hours of wakefulness, and it’s totally okay 👀",
+                                    style: TextStyle(
+                                      color: Color(0xFFFFDCEE),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.04,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "100 messages per month",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Color(0xFFDD4594),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "500 character limit per message",
+                                        style: TextStyle(
+                                          color: Color(0xFFFFDCEE),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 0.04,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Text(
+                                    "\$39.99 a month",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed:
+                        isPaymentLoading ? null : () => upgradeSubscription(),
+                    style: ElevatedButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                      backgroundColor: Color(0xFFDD4594),
+                      disabledBackgroundColor: Color(0xFFDD4594),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: isPaymentLoading
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 1,
+                            ),
+                          )
+                        : Text(
+                            "Continue",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                          ),
+                  )
+                ],
               ),
-      ),
+            ),
     );
   }
 }

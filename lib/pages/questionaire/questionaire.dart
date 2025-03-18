@@ -20,24 +20,41 @@ void showEndChatQuestionnaire(BuildContext context) {
       return StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
-            backgroundColor: Color(0xFF301530), // Dark purple background
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
+            backgroundColor: Color(0xFF180C12), // Dark purple background
             child: Container(
-              padding: EdgeInsets.all(24),
+              width: MediaQuery.of(context).size.width * 0.9,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Color(0xFF8B2359),
+                  width: 1,
+                ),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Close button at top right
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: Icon(Icons.close, color: Colors.white70),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                  Row(
+                    children: [
+                      Spacer(),
+                      Container(
+                        alignment: Alignment.topRight,
+                        padding: EdgeInsets.zero,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF330E22),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Icons.close,
+                            size: 10,
+                            color: Color(0xFFDD4594),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   // Title
@@ -130,8 +147,9 @@ void showEndChatQuestionnaire(BuildContext context) {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFE152C2),
-                      minimumSize: Size(double.infinity, 50),
+                      backgroundColor: Color(0xFFDD4594),
+                      minimumSize:
+                          Size(MediaQuery.of(context).size.width * 0.5, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
@@ -157,8 +175,8 @@ void showEndChatQuestionnaire(BuildContext context) {
                         height: 4,
                         decoration: BoxDecoration(
                           color: currentPage >= 0
-                              ? Color(0xFFE152C2)
-                              : Colors.white24,
+                              ? Color(0xFFDD4594)
+                              : Color(0xFF8B2359),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -168,8 +186,8 @@ void showEndChatQuestionnaire(BuildContext context) {
                         height: 4,
                         decoration: BoxDecoration(
                           color: currentPage >= 1
-                              ? Color(0xFFE152C2)
-                              : Colors.white24,
+                              ? Color(0xFFDD4594)
+                              : Color(0xFF8B2359),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -179,8 +197,8 @@ void showEndChatQuestionnaire(BuildContext context) {
                         height: 4,
                         decoration: BoxDecoration(
                           color: currentPage >= 2
-                              ? Color(0xFFE152C2)
-                              : Colors.white24,
+                              ? Color(0xFFDD4594)
+                              : Color(0xFF8B2359),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -190,8 +208,8 @@ void showEndChatQuestionnaire(BuildContext context) {
                         height: 4,
                         decoration: BoxDecoration(
                           color: currentPage >= 3
-                              ? Color(0xFFE152C2)
-                              : Colors.white24,
+                              ? Color(0xFFDD4594)
+                              : Color(0xFF8B2359),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

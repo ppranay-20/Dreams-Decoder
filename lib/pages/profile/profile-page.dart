@@ -320,7 +320,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 20,
                       ),
                       _buildDropdown(
-                          "Gender", ["male", "female"], selectedGender,
+                          "Gender", ["Male", "Female"], selectedGender,
                           (value) {
                         setState(() {
                           selectedGender = value;

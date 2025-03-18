@@ -44,10 +44,10 @@ class QuestionTwo extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.4,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Color(0xFF231427),
+          color: Color(0xFF180C12),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: Colors.grey,
+            color: Color(0xFF8B2359),
             width: 1,
           ),
         ),
@@ -65,15 +65,16 @@ class QuestionTwo extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
+                color: Color(0xFF330E22),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.grey,
+                  color: Color(0xFF8B2359),
                   width: 1,
                 ),
               ),
               child: isSelected
-                  ? Icon(Icons.check, color: Color(0xFFE361CF), size: 16)
-                  : Icon(Icons.check, color: Colors.grey, size: 16),
+                  ? Icon(Icons.check, color: Color(0xFFDD4594), size: 16)
+                  : null,
             ),
           ],
         ),

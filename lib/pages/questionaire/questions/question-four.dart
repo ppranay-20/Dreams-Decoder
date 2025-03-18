@@ -36,23 +36,23 @@ class _QuestionFourState extends State<QuestionFour> {
         ),
         SizedBox(height: 16),
         TextField(
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFFDD4594)),
           decoration: InputDecoration(
             hintText: "Type your dream description here...",
-            hintStyle: TextStyle(color: Colors.white54),
+            hintStyle: TextStyle(color: Color(0xFF8B2359)),
             filled: true,
-            fillColor: Color(0xFF231427),
+            fillColor: Color(0xFF180C12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white54),
+              borderSide: BorderSide(color: Color(0xFF8B2359)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white30),
+              borderSide: BorderSide(color: Color(0xFF8B2359)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFFE361CF)),
+              borderSide: BorderSide(color: Color(0xFF8B2359)),
             ),
             contentPadding: EdgeInsets.all(16),
           ),

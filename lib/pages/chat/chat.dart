@@ -106,8 +106,10 @@ class _ChatPageState extends State<ChatPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("End Chat"),
-            content: Text("Do you really want to delete the chat?"),
+            title: Text("End Chat", style: TextStyle(color: Colors.white)),
+            backgroundColor: Color(0xFF180C12),
+            content: Text("Do you really want to delete the chat?",
+                style: TextStyle(color: Colors.white, fontSize: 16)),
             actions: [
               TextButton(
                 onPressed: () {

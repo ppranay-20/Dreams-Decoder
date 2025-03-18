@@ -5,6 +5,7 @@ import 'package:murkaverse/providers/user-provider.dart';
 import 'package:murkaverse/pages/chat/chat.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:murkaverse/widgets/dreams-card.dart';
+import 'package:murkaverse/widgets/show-close-chat.dart';
 import 'package:murkaverse/widgets/updgrade-subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,16 +61,18 @@ class _DreamHistoryState extends State<DreamHistory> {
 
     if (isLoading) return;
 
+    if (chatProvider.chats.isNotEmpty) {
+      bool isPrevChatClosed = chatProvider.chats[0]['status'] != 'closed';
+
+      if (isPrevChatClosed) {
+        showCustomDialog(context, chatProvider.chats[0]);
+        return;
+      }
+    }
+
     if (messageLimit <= 0) {
       showErrorSnackBar(
           context, "You don't have message left, Please buy more messages");
-      return;
-    }
-
-    bool isPrevChatClosed = chatProvider.chats[0]['status'] != 'closed';
-
-    if (isPrevChatClosed) {
-      showErrorSnackBar(context, "Please close the previous chat");
       return;
     }
 

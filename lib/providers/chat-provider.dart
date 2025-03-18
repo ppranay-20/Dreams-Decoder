@@ -13,6 +13,7 @@ class ChatProvider extends ChangeNotifier {
   Map<DateTime, List<dynamic>> _events = {};
   bool _isLoadingChats = false;
   bool _hasChatsLoaded = false;
+  bool _endChatLoading = false;
 
   Map<String, dynamic>? get currentChat => _currentChat;
   bool get isLoading => _isLoading;
@@ -21,6 +22,7 @@ class ChatProvider extends ChangeNotifier {
   bool get isLoadingChats => _isLoadingChats;
   bool get hasChatsLoaded => _hasChatsLoaded;
   bool get hasActiveChat => _currentChat != null && _currentChat!.isNotEmpty;
+  bool get endChatLoading => _endChatLoading;
 
   void setCurrentChat(Map<String, dynamic> chat) {
     _currentChat = chat;
@@ -63,6 +65,7 @@ class ChatProvider extends ChangeNotifier {
         _chats = List<Map<String, dynamic>>.from(sortedChats);
         _events = groupChatsByDate(_chats);
         _hasChatsLoaded = true;
+        _currentChat = _chats.first;
       } else {
         debugPrint("Failed to load chats: ${response.statusCode}");
       }
@@ -127,6 +130,9 @@ class ChatProvider extends ChangeNotifier {
       return null;
     }
 
+    _endChatLoading = true;
+    notifyListeners();
+
     try {
       final chatId = _currentChat!['id'];
       final url = getAPIUrl('chat/end-chat/$chatId');
@@ -148,6 +154,9 @@ class ChatProvider extends ChangeNotifier {
     } catch (err) {
       debugPrint("An error occurred ending chat: $err");
       return null;
+    } finally {
+      _endChatLoading = false;
+      notifyListeners();
     }
   }
 }

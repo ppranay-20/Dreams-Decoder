@@ -88,10 +88,10 @@ class QuestionOne extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Color(0xFFE152C2) : Color(0xFF180E18),
+          color: isSelected ? Color(0xFF8B2359) : Color(0xFF180C12),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Color(0xFFE152C2) : Colors.white24,
+            color: Color(0xFF8B2359),
             width: 1,
           ),
         ),
