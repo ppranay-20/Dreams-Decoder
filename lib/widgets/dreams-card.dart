@@ -17,7 +17,9 @@ class DreamCard extends StatelessWidget {
     final String firstMessage = messages.isNotEmpty && messages.length > 1
         ? messages[1]['content']
         : "No messages";
-
+    final String secondMessage = messages.isNotEmpty && messages.length >= 3
+        ? messages[2]['content']
+        : "";
     return GestureDetector(
       onTap: () => navigateToChat(chat),
       child: Container(
@@ -36,14 +38,31 @@ class DreamCard extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Text(
-                    firstMessage,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        firstMessage,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        secondMessage,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                      ),
+                    ],
                   ),
                 ),
               ),

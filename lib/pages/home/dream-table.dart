@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:murkaverse/providers/chat-provider.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class DreamsTable extends StatefulWidget {
@@ -125,7 +127,10 @@ class _DreamsTableState extends State<DreamsTable> {
                         ],
                       ),
                       child: GestureDetector(
-                        onTap: widget.createNewChatLoading
+                        onTap: widget.createNewChatLoading ||
+                                Provider.of<ChatProvider>(context,
+                                        listen: false)
+                                    .isLoadingChats
                             ? null
                             : () => widget.createNewChat(),
                         child: Row(

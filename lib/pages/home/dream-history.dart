@@ -211,143 +211,175 @@ class _DreamHistoryState extends State<DreamHistory> {
                     letterSpacing: 0.4),
               ),
               SizedBox(height: 24),
-              Container(
-                  padding: EdgeInsets.fromLTRB(12, 12, 0, 0),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF330E22), // Semi-transparent background
-                    borderRadius:
-                        BorderRadius.circular(10), // Optional rounded corners
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                      padding: EdgeInsets.fromLTRB(12, 12, 0, 0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF330E22), // Semi-transparent background
+                        borderRadius: BorderRadius.circular(
+                            10), // Optional rounded corners
+                      ),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Consumer<UserProvider>(
-                                builder: (context, userProvider, child) {
-                                  final messageLimit =
-                                      userProvider.userData?['message_limit'] ??
-                                          "null";
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                        height: 30,
-                                        width:
-                                            MediaQuery.of(context).size.width *
+                              Row(
+                                children: [
+                                  Consumer<UserProvider>(
+                                    builder: (context, userProvider, child) {
+                                      final messageLimit = userProvider
+                                          .userData?['message_limit'];
+                                      final loading = userProvider.isLoading;
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            height: 30,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
                                                 0.45,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Color(
-                                                  0xFF4A1D4A), // Dark purple-pink at top
-                                              Color(0xFF2D0B2D), // Mid purple
-                                              Color(
-                                                  0xFF1A061A), // Darker purple
-                                              Color(
-                                                  0xFF2D0B2D), // Returns to mid purple
-                                              Color(
-                                                  0xFF380D38), // Slightly lighter purple at bottom
-                                            ],
-                                            stops: [0.0, 0.3, 0.5, 0.7, 1.0],
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Color(0xFFDD4594),
-                                              blurRadius: 5,
-                                              spreadRadius: 0,
-                                              offset: Offset(0, 0),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 20, vertical: 5),
-                                              decoration: BoxDecoration(
-                                                color: Color(0xFFDD4594),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Color(
+                                                      0xFF4A1D4A), // Dark purple-pink at top
+                                                  Color(
+                                                      0xFF2D0B2D), // Mid purple
+                                                  Color(
+                                                      0xFF1A061A), // Darker purple
+                                                  Color(
+                                                      0xFF2D0B2D), // Returns to mid purple
+                                                  Color(
+                                                      0xFF380D38), // Slightly lighter purple at bottom
+                                                ],
+                                                stops: [
+                                                  0.0,
+                                                  0.3,
+                                                  0.5,
+                                                  0.7,
+                                                  1.0
+                                                ],
                                               ),
-                                              child: Text(
-                                                messageLimit.toString(),
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Color(0xFFDD4594),
+                                                  blurRadius: 5,
+                                                  spreadRadius: 0,
+                                                  offset: Offset(0, 0),
                                                 ),
-                                              ),
+                                              ],
                                             ),
-                                            Expanded(
-                                              child: Padding(
-                                                padding:
-                                                    EdgeInsets.only(right: 20),
-                                                child: Text(
-                                                  "FILL UP",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 11,
-                                                    letterSpacing: 1.1,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 5),
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFDD4594),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
                                                   ),
-                                                  textAlign: TextAlign.center,
+                                                  child: loading
+                                                      ? SizedBox(
+                                                          height: 18,
+                                                          width: 17,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        )
+                                                      : Text(
+                                                          messageLimit
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
                                                 ),
-                                              ),
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                        right: 20),
+                                                    child: Text(
+                                                      "FILL UP",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 11,
+                                                        letterSpacing: 1.1,
+                                                      ),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                "It looks like you're nearing the end\nof your free monthly dream credits.",
+                                style: TextStyle(
+                                  color: Color(0xFFF5E2FD),
+                                  fontSize: 12,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  showPaymentDialog(context);
                                 },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Text(
+                                    "Click here to top-up your plan",
+                                    style: TextStyle(
+                                      color: Color(0xFF699DFF),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 12),
-                          Text(
-                            "It looks like you're nearing the end\nof your free monthly dream credits.",
-                            style: TextStyle(
-                              color: Color(0xFFF5E2FD),
-                              fontSize: 12,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {
-                              showPaymentDialog(context);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Text(
-                                "Click here to top-up your plan",
-                                style: TextStyle(
-                                  color: Color(0xFF699DFF),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
-                      ),
-                      SizedBox(width: 20),
-                      Image.asset(
-                        'assets/cat.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  )),
+                      )),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Image.asset(
+                      'assets/cat.png',
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                ],
+              ),
               SizedBox(
                 height: 20,
               ),
@@ -424,77 +456,79 @@ class _DreamHistoryState extends State<DreamHistory> {
                 ),
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    // Dreams table section
-                    DreamsTable(
-                      events: Provider.of<ChatProvider>(context, listen: false)
-                          .events,
-                      onDateSelected: onDateSelected,
-                      onMonthChanged: onMonthChanged,
-                      createNewChat: createNewChat,
-                      createNewChatLoading: createNewChatLoading,
-                    ),
+                child: Consumer<ChatProvider>(
+                    builder: (context, chatProvider, child) {
+                  return ListView(
+                    children: [
+                      // Dreams table section
+                      DreamsTable(
+                        events: chatProvider.events,
+                        onDateSelected: onDateSelected,
+                        onMonthChanged: onMonthChanged,
+                        createNewChat: createNewChat,
+                        createNewChatLoading: createNewChatLoading,
+                      ),
 
-                    SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          color: Color(0xFFDD4594),
-                          shadows: [
-                            Shadow(
-                              color: Color(0xFF2D0B2D),
-                              blurRadius: 5,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                          size: 12,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "My Dreams in $monthYearText:",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.4,
+                      SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            color: Color(0xFFDD4594),
+                            shadows: [
+                              Shadow(
+                                color: Color(0xFF2D0B2D),
+                                blurRadius: 5,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                            size: 12,
                           ),
-                        ),
-                      ],
-                    ),
+                          SizedBox(width: 10),
+                          Text(
+                            "My Dreams in $monthYearText:",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ],
+                      ),
 
-                    SizedBox(height: 20),
+                      SizedBox(height: 20),
 
-                    // Chat list section
-                    Consumer<ChatProvider>(
-                        builder: (context, chatProvider, child) {
-                      final filteredChats = getFilteredChats();
+                      // Chat list section
+                      Consumer<ChatProvider>(
+                          builder: (context, chatProvider, child) {
+                        final filteredChats = getFilteredChats();
 
-                      return chatProvider.isLoadingChats
-                          ? Center(child: CircularProgressIndicator())
-                          : filteredChats.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    selectedDate != null
-                                        ? "No dreams for this date"
-                                        : "No dreams found for this month",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: filteredChats.length,
-                                  itemBuilder: (context, index) {
-                                    final chat = filteredChats[index];
-                                    return DreamCard(
-                                        chat: chat,
-                                        navigateToChat: navigateToChat);
-                                  });
-                    })
-                  ],
-                ),
+                        return chatProvider.isLoadingChats
+                            ? Center(child: CircularProgressIndicator())
+                            : filteredChats.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      selectedDate != null
+                                          ? "No dreams for this date"
+                                          : "No dreams found for this month",
+                                      style: TextStyle(color: Colors.white70),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: filteredChats.length,
+                                    itemBuilder: (context, index) {
+                                      final chat = filteredChats[index];
+                                      return DreamCard(
+                                          chat: chat,
+                                          navigateToChat: navigateToChat);
+                                    });
+                      })
+                    ],
+                  );
+                }),
               )
             ],
           ),

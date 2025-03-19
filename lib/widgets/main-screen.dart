@@ -75,15 +75,15 @@ class _MainScreenState extends State<MainScreen> {
   void _handleChatTab() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (chatProvider.isLoading) return;
 
-    if (!chatProvider.hasActiveChat) {
-      showErrorSnackBar(context, "Select a dream or add new dream");
-      return;
-    }
+    bool isPrevChatClosed = chatProvider.chats[0]['status'] == 'closed' ||
+        chatProvider.chats.isEmpty;
+    final previousChat = chatProvider.chats[0];
 
-    final chat = chatProvider.currentChat;
     final messageLimit = userProvider.userData?['message_limit'] as int;
     final charLimit = userProvider.userData?['character_limit'] as int;
+    final Map<String, dynamic> chat;
 
     if (messageLimit <= 0) {
       showErrorSnackBar(
@@ -91,13 +91,18 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    if (chatProvider.isLoading) return;
+    if (isPrevChatClosed) {
+      final newChat = await chatProvider.createNewChat();
+      chat = newChat!;
+    } else {
+      chat = previousChat;
+    }
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ChatPage(
-          chat: chat!,
+          chat: chat,
           messageLimit: messageLimit,
           charLimit: charLimit,
         ),

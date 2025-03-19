@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:murkaverse/pages/chat/chat.dart';
+import 'package:murkaverse/pages/questionaire/questionaire.dart';
 import 'package:murkaverse/providers/user-provider.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:provider/provider.dart';
@@ -81,6 +82,7 @@ void showCustomDialog(BuildContext context, Map<String, dynamic> chat) {
                         }
                         chatProvider.endCurrentChat();
                         Navigator.pop(context);
+                        showEndChatQuestionnaire(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFFDD4594),

@@ -13,6 +13,7 @@ class QuestionOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           "1. How did this dream make you feel?",
@@ -28,8 +29,8 @@ class QuestionOne extends StatelessWidget {
 
         // First row of emotions
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 5,
+          runSpacing: 5,
           alignment: WrapAlignment.center,
           children: [
             _buildEmotionChip("😌 Calm", "Calm"),

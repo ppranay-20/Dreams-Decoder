@@ -102,45 +102,61 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void endChat() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("End Chat", style: TextStyle(color: Colors.white)),
-            backgroundColor: Color(0xFF180C12),
-            content: Text("Do you really want to delete the chat?",
-                style: TextStyle(color: Colors.white, fontSize: 16)),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text("No", style: TextStyle(color: Colors.blueAccent)),
-              ),
-              TextButton(
-                onPressed: () async {
-                  try {
-                    final chatProvider =
-                        Provider.of<ChatProvider>(context, listen: false);
-                    final updatedChat = await chatProvider.endCurrentChat();
+    // showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text("End Chat",
+    //             style: TextStyle(color: Colors.white, fontSize: 16)),
+    //         backgroundColor: Color(0xFF180C12),
+    //         content: Text("Do you really want to delete the chat?",
+    //             style: TextStyle(color: Colors.white, fontSize: 13)),
+    //         actions: [
+    //           ElevatedButton(
+    //             onPressed: () {
+    //               Navigator.pop(context);
+    //             },
+    //             style: ElevatedButton.styleFrom(
+    //               backgroundColor: Colors.blue,
+    //               shape: RoundedRectangleBorder(
+    //                 borderRadius: BorderRadius.circular(25),
+    //               ),
+    //             ),
+    //             child: Text("No", style: TextStyle(color: Colors.white)),
+    //           ),
+    //           ElevatedButton(
+    //             onPressed: () async {
+    //               try {
+    //                 final chatProvider =
+    //                     Provider.of<ChatProvider>(context, listen: false);
+    //                 final updatedChat = await chatProvider.endCurrentChat();
 
-                    if (updatedChat != null) {
-                      setState(() {
-                        chat = updatedChat;
-                        status = updatedChat["status"] == "open" ? true : false;
-                        showSuccessSnackbar(context, "Chat ended successfully");
-                        showEndChatQuestionnaire(context);
-                      });
-                    }
-                  } catch (e) {
-                    debugPrint("An error occured $e");
-                  }
-                },
-                child: Text("Yes", style: TextStyle(color: Colors.red)),
-              ),
-            ],
-          );
-        });
+    //                 if (updatedChat != null) {
+    //                   setState(() {
+    //                     chat = updatedChat;
+    //                     status = updatedChat["status"] == "open" ? true : false;
+    //                     showSuccessSnackbar(context, "Chat ended successfully");
+    //                     Navigator.pop(context);
+    //                     showEndChatQuestionnaire(context);
+    //                   });
+    //                 }
+    //               } catch (e) {
+    //                 debugPrint("An error occured $e");
+    //               }
+    //             },
+    //             style: ElevatedButton.styleFrom(
+    //               backgroundColor: Color(0xFFDD4594),
+    //               shape: RoundedRectangleBorder(
+    //                 borderRadius: BorderRadius.circular(25),
+    //               ),
+    //             ),
+    //             child: Text("Yes", style: TextStyle(color: Colors.white)),
+    //           ),
+    //         ],
+    //       );
+    //     });
+
+    showEndChatQuestionnaire(context);
   }
 
   @override
