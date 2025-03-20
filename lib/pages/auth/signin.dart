@@ -117,7 +117,6 @@ class _SigninState extends State<Signin> {
                               fontSize: 14,
                               color: Colors.white,
                               letterSpacing: 0.4,
-                              fontFamily: 'SourceSans3',
                             ),
                           ),
                           SizedBox(height: 6),
@@ -130,7 +129,6 @@ class _SigninState extends State<Signin> {
                                   fontSize: 14,
                                   color: Colors.white,
                                   letterSpacing: 0.4,
-                                  fontFamily: 'SourceSans3',
                                 ),
                               ),
                               SizedBox(width: 6),
@@ -315,8 +313,7 @@ class _SigninState extends State<Signin> {
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: 'Inter'),
+                                                fontWeight: FontWeight.w600),
                                           )
                                         ],
                                       ),
@@ -340,8 +337,7 @@ class _SigninState extends State<Signin> {
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: 'Inter'),
+                                                fontWeight: FontWeight.w600),
                                           )
                                         ],
                                       ),
