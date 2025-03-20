@@ -102,61 +102,59 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void endChat() {
-    // showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text("End Chat",
-    //             style: TextStyle(color: Colors.white, fontSize: 16)),
-    //         backgroundColor: Color(0xFF180C12),
-    //         content: Text("Do you really want to delete the chat?",
-    //             style: TextStyle(color: Colors.white, fontSize: 13)),
-    //         actions: [
-    //           ElevatedButton(
-    //             onPressed: () {
-    //               Navigator.pop(context);
-    //             },
-    //             style: ElevatedButton.styleFrom(
-    //               backgroundColor: Colors.blue,
-    //               shape: RoundedRectangleBorder(
-    //                 borderRadius: BorderRadius.circular(25),
-    //               ),
-    //             ),
-    //             child: Text("No", style: TextStyle(color: Colors.white)),
-    //           ),
-    //           ElevatedButton(
-    //             onPressed: () async {
-    //               try {
-    //                 final chatProvider =
-    //                     Provider.of<ChatProvider>(context, listen: false);
-    //                 final updatedChat = await chatProvider.endCurrentChat();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("End Chat",
+                style: TextStyle(color: Colors.white, fontSize: 16)),
+            backgroundColor: Color(0xFF180C12),
+            content: Text("Do you really want to delete the chat?",
+                style: TextStyle(color: Colors.white, fontSize: 13)),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: Text("No", style: TextStyle(color: Colors.white)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    final chatProvider =
+                        Provider.of<ChatProvider>(context, listen: false);
+                    final updatedChat = await chatProvider.endCurrentChat();
 
-    //                 if (updatedChat != null) {
-    //                   setState(() {
-    //                     chat = updatedChat;
-    //                     status = updatedChat["status"] == "open" ? true : false;
-    //                     showSuccessSnackbar(context, "Chat ended successfully");
-    //                     Navigator.pop(context);
-    //                     showEndChatQuestionnaire(context);
-    //                   });
-    //                 }
-    //               } catch (e) {
-    //                 debugPrint("An error occured $e");
-    //               }
-    //             },
-    //             style: ElevatedButton.styleFrom(
-    //               backgroundColor: Color(0xFFDD4594),
-    //               shape: RoundedRectangleBorder(
-    //                 borderRadius: BorderRadius.circular(25),
-    //               ),
-    //             ),
-    //             child: Text("Yes", style: TextStyle(color: Colors.white)),
-    //           ),
-    //         ],
-    //       );
-    //     });
-
-    showEndChatQuestionnaire(context);
+                    if (updatedChat != null) {
+                      setState(() {
+                        chat = updatedChat;
+                        status = updatedChat["status"] == "open" ? true : false;
+                        showSuccessSnackbar(context, "Chat ended successfully");
+                        Navigator.pop(context);
+                        showEndChatQuestionnaire(context);
+                      });
+                    }
+                  } catch (e) {
+                    debugPrint("An error occured $e");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFDD4594),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: Text("Yes", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -191,7 +189,10 @@ class _ChatPageState extends State<ChatPage> {
         title: Text(
           "Dream Chat",
           style: TextStyle(
-              fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'MinionPro'),
         ),
       ),
       body: Column(
@@ -222,7 +223,7 @@ class _ChatPageState extends State<ChatPage> {
                                   top: -catHeight * 0.35,
                                   right: 0,
                                   child: Image.asset(
-                                    "assets/cat3.png",
+                                    "assets/images/cat3.png",
                                     width: catWidth,
                                     height: catHeight,
                                     fit: BoxFit.contain,
@@ -245,7 +246,7 @@ class _ChatPageState extends State<ChatPage> {
                                         width: 30,
                                         height: 30,
                                         child: Image.asset(
-                                          "assets/chat_cat.png",
+                                          "assets/images/chat_cat.png",
                                           width: 30,
                                           height: 30,
                                           fit: BoxFit.contain,
@@ -297,7 +298,7 @@ class _ChatPageState extends State<ChatPage> {
                             width: 30,
                             height: 30,
                             child: Image.asset(
-                              "assets/chat_cat.png",
+                              "assets/images/chat_cat.png",
                               width: 30,
                               height: 30,
                               fit: BoxFit.contain,

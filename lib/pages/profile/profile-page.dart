@@ -266,7 +266,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
-                                fontWeight: FontWeight.bold)),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.4,
+                                fontFamily: 'MinionPro')),
                         SizedBox(
                           height: 5,
                         ),
@@ -275,7 +277,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
-                                fontWeight: FontWeight.bold)),
+                                fontWeight: FontWeight.w300,
+                                fontStyle: FontStyle.italic)),
                       ],
                     ),
                   ),
@@ -293,7 +296,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Image.asset(
-                                    "assets/cat-moon.png",
+                                    "assets/images/cat-moon.png",
                                     fit: BoxFit.cover,
                                   ),
                                   SizedBox(
@@ -301,7 +304,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   Expanded(
                                     child: Image.asset(
-                                      "assets/signuptext.png",
+                                      "assets/images/signuptext.png",
                                       fit: BoxFit.contain,
                                     ),
                                   ),

@@ -52,6 +52,7 @@ Widget profileOption(IconData icon, String title, String description,
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
                 letterSpacing: -0.15,
+                fontFamily: 'MinionPro',
               ),
             ),
             Text(
@@ -102,7 +103,9 @@ class _ProfileState extends State<Profile> {
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 26,
-                    fontWeight: FontWeight.bold)),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.4,
+                    fontFamily: 'MinionPro')),
             SizedBox(
               height: 20,
             ),
@@ -175,6 +178,7 @@ class _ProfileState extends State<Profile> {
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
+                                  fontFamily: 'MinionPro',
                                 ),
                               ),
                               Text(

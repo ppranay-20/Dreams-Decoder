@@ -124,7 +124,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    print(selectedPlan);
     return Dialog(
       backgroundColor: Color(0xFF180C12),
       insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -165,7 +164,8 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.w600),
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'MinionPro'),
                   ),
                   SizedBox(
                     height: 10,
@@ -269,6 +269,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                           color: Colors.white,
                                           fontSize: 17,
                                           fontWeight: FontWeight.w600,
+                                          fontFamily: 'MinionPro',
                                         ),
                                       )
                                     ],
@@ -283,6 +284,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: 0.04,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                   SizedBox(
@@ -411,6 +413,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                           color: Colors.white,
                                           fontSize: 17,
                                           fontWeight: FontWeight.w600,
+                                          fontFamily: 'MinionPro',
                                         ),
                                       )
                                     ],
@@ -425,6 +428,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: 0.04,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                   SizedBox(
@@ -553,6 +557,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                           color: Colors.white,
                                           fontSize: 17,
                                           fontWeight: FontWeight.w600,
+                                          fontFamily: 'MinionPro',
                                         ),
                                       )
                                     ],
@@ -567,6 +572,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: 0.04,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                   SizedBox(

@@ -18,7 +18,7 @@ class _LoggedOutState extends State<LoggedOut> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              "assets/bg_image.png",
+              "assets/images/bg_image.png",
               fit: BoxFit.cover,
             ),
           ),
@@ -35,7 +35,7 @@ class _LoggedOutState extends State<LoggedOut> {
                         children: [
                           Center(
                             child: Image.asset(
-                              "assets/logo.png",
+                              "assets/images/logo.png",
                               fit: BoxFit.cover,
                               width: MediaQuery.of(context).size.width * 0.4,
                             ),
@@ -49,7 +49,7 @@ class _LoggedOutState extends State<LoggedOut> {
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontStyle: FontStyle.italic,
-                              fontFamily: 'Mini',
+                              fontFamily: 'MinionPro',
                             ),
                           ),
                           SizedBox(height: 3),
@@ -70,6 +70,7 @@ class _LoggedOutState extends State<LoggedOut> {
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.4,
+                              fontFamily: 'SourceSans3',
                             ),
                           ),
                           SizedBox(height: 20),
@@ -80,6 +81,7 @@ class _LoggedOutState extends State<LoggedOut> {
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.4,
+                              fontFamily: 'SourceSans3',
                             ),
                           ),
                         ],

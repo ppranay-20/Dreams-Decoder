@@ -32,6 +32,7 @@ class _QuestionFourState extends State<QuestionFour> {
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w500,
+            fontFamily: 'MinionPro',
           ),
         ),
         SizedBox(height: 16),

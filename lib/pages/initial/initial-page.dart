@@ -25,7 +25,7 @@ class _InitialPageState extends State<InitialPage> {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          'assets/logo.png',
+          'assets/images/logo.png',
           fit: BoxFit.contain,
           width: MediaQuery.of(context).size.width * 0.4,
         ),

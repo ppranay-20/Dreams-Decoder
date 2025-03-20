@@ -12,60 +12,63 @@ class QuestionOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "1. How did this dream make you feel?",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "1. How did this dream make you feel?",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'MinionPro',
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
 
-        SizedBox(height: 16),
+          SizedBox(height: 16),
 
-        // First row of emotions
-        Wrap(
-          spacing: 5,
-          runSpacing: 5,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildEmotionChip("😌 Calm", "Calm"),
-            _buildEmotionChip("😊 Happy", "Happy"),
-            _buildEmotionChip("⚡ Energetic", "Energetic"),
-          ],
-        ),
+          // First row of emotions
+          Wrap(
+            spacing: 5,
+            runSpacing: 5,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildEmotionChip("😌 Calm", "Calm"),
+              _buildEmotionChip("😊 Happy", "Happy"),
+              _buildEmotionChip("⚡ Energetic", "Energetic"),
+            ],
+          ),
 
-        SizedBox(height: 8),
+          SizedBox(height: 8),
 
-        // Second row of emotions
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildEmotionChip("😜 Frisky", "Frisky"),
-            _buildEmotionChip("🔄 Mood Swings", "Mood Swings"),
-          ],
-        ),
+          // Second row of emotions
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildEmotionChip("😜 Frisky", "Frisky"),
+              _buildEmotionChip("🔄 Mood Swings", "Mood Swings"),
+            ],
+          ),
 
-        SizedBox(height: 8),
+          SizedBox(height: 8),
 
-        // Third row of emotions
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildEmotionChip("😠 Irritated", "Irritated"),
-            _buildEmotionChip("😢 Sad", "Sad"),
-            _buildEmotionChip("😰 Anxious", "Anxious"),
-          ],
-        ),
-      ],
+          // Third row of emotions
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildEmotionChip("😠 Irritated", "Irritated"),
+              _buildEmotionChip("😢 Sad", "Sad"),
+              _buildEmotionChip("😰 Anxious", "Anxious"),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

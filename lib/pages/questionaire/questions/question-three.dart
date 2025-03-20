@@ -16,6 +16,8 @@ class QuestionThree extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
+            fontFamily: 'MinionPro',
+            fontWeight: FontWeight.w500,
           ),
         ),
         SizedBox(height: 16),

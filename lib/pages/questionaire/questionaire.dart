@@ -46,6 +46,7 @@ void showEndChatQuestionnaire(BuildContext context) {
                           Container(
                             alignment: Alignment.topRight,
                             padding: EdgeInsets.zero,
+                            margin: EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               color: Color(0xFF330E22),
                               shape: BoxShape.circle,
@@ -69,6 +70,7 @@ void showEndChatQuestionnaire(BuildContext context) {
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'MinionPro',
                         ),
                         textAlign: TextAlign.center,
                       ),

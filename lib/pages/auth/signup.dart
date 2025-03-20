@@ -105,6 +105,7 @@ class _SignupState extends State<Signup> {
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
+                              fontFamily: 'MinionPro',
                             ),
                           ),
                           SizedBox(height: 2),
@@ -330,7 +331,7 @@ class _SignupState extends State<Signup> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Image.asset("assets/apple.png",
+                                    Image.asset("assets/images/apple.png",
                                         height: 17, width: 14),
                                     SizedBox(
                                       width: 6,
@@ -340,7 +341,8 @@ class _SignupState extends State<Signup> {
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Inter'),
                                     )
                                   ],
                                 ),
@@ -352,7 +354,7 @@ class _SignupState extends State<Signup> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Image.asset("assets/google.png",
+                                    Image.asset("assets/images/google.png",
                                         height: 17, width: 14),
                                     SizedBox(
                                       width: 6,
@@ -362,7 +364,8 @@ class _SignupState extends State<Signup> {
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Inter'),
                                     )
                                   ],
                                 ),

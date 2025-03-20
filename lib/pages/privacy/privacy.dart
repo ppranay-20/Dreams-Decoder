@@ -35,6 +35,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontFamily: 'MinionPro',
           ),
         ),
       ),

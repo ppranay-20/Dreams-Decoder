@@ -53,6 +53,7 @@ void showCustomDialog(BuildContext context, Map<String, dynamic> chat) {
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
+                              fontFamily: 'MinionPro',
                             ),
                           ),
                           SizedBox(height: 4),

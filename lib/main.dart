@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Color(0xFF180C12),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        fontFamily: 'SourceSans3',
       ),
       home: InitialPage(),
     );

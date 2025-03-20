@@ -47,6 +47,7 @@ class DreamCard extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          fontStyle: FontStyle.italic,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,

@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
   void _handleChatTab() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (chatProvider.isLoading) return;
+    if (chatProvider.isLoading || chatProvider.isLoadingChats) return;
 
     bool isPrevChatClosed = chatProvider.chats[0]['status'] == 'closed' ||
         chatProvider.chats.isEmpty;

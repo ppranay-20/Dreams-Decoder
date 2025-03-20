@@ -108,6 +108,7 @@ class _SigninState extends State<Signin> {
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                               letterSpacing: 0.4,
+                              fontFamily: 'MinionPro',
                             ),
                           ),
                           Text(
@@ -116,6 +117,7 @@ class _SigninState extends State<Signin> {
                               fontSize: 14,
                               color: Colors.white,
                               letterSpacing: 0.4,
+                              fontFamily: 'SourceSans3',
                             ),
                           ),
                           SizedBox(height: 6),
@@ -128,6 +130,7 @@ class _SigninState extends State<Signin> {
                                   fontSize: 14,
                                   color: Colors.white,
                                   letterSpacing: 0.4,
+                                  fontFamily: 'SourceSans3',
                                 ),
                               ),
                               SizedBox(width: 6),
@@ -302,7 +305,7 @@ class _SigninState extends State<Signin> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Image.asset("assets/apple.png",
+                                          Image.asset("assets/images/apple.png",
                                               height: 17, width: 14),
                                           SizedBox(
                                             width: 6,
@@ -312,7 +315,8 @@ class _SigninState extends State<Signin> {
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
-                                                fontWeight: FontWeight.w600),
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: 'Inter'),
                                           )
                                         ],
                                       ),
@@ -324,8 +328,10 @@ class _SigninState extends State<Signin> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Image.asset("assets/google.png",
-                                              height: 17, width: 14),
+                                          Image.asset(
+                                              "assets/images/google.png",
+                                              height: 17,
+                                              width: 14),
                                           SizedBox(
                                             width: 6,
                                           ),
@@ -334,7 +340,8 @@ class _SigninState extends State<Signin> {
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
-                                                fontWeight: FontWeight.w600),
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: 'Inter'),
                                           )
                                         ],
                                       ),

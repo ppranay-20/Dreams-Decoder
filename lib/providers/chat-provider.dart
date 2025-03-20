@@ -110,6 +110,7 @@ class ChatProvider extends ChangeNotifier {
         setCurrentChat(chat);
         _isLoading = false;
         notifyListeners();
+        refreshChats();
         return chat;
       } else {
         _isLoading = false;

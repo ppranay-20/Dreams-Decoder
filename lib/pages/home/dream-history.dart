@@ -87,7 +87,6 @@ class _DreamHistoryState extends State<DreamHistory> {
       setState(() {
         createNewChatLoading = false;
       });
-      chatProvider.refreshChats();
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -194,7 +193,7 @@ class _DreamHistoryState extends State<DreamHistory> {
             children: [
               SizedBox(height: 6),
               Image.asset(
-                "assets/logo.png",
+                "assets/images/logo.png",
                 fit: BoxFit.contain,
                 height: 50,
                 width: 200,
@@ -347,6 +346,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                                 style: TextStyle(
                                   color: Color(0xFFF5E2FD),
                                   fontSize: 12,
+                                  fontStyle: FontStyle.italic,
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -362,6 +362,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                                       color: Color(0xFF699DFF),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                 ),
@@ -374,7 +375,7 @@ class _DreamHistoryState extends State<DreamHistory> {
                     right: 0,
                     bottom: 0,
                     child: Image.asset(
-                      'assets/cat.png',
+                      'assets/images/cat.png',
                       fit: BoxFit.cover,
                     ),
                   )
@@ -437,7 +438,10 @@ class _DreamHistoryState extends State<DreamHistory> {
                                                   "Click here to finish completing your profile information!",
                                                   style: TextStyle(
                                                       color: Color(0xFFF5E2FD),
-                                                      fontSize: 14),
+                                                      fontSize: 14,
+                                                      fontStyle:
+                                                          FontStyle.italic,
+                                                      fontFamily: 'MinionPro'),
                                                   overflow:
                                                       TextOverflow.visible,
                                                   softWrap: true,
