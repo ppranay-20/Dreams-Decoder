@@ -75,7 +75,7 @@ class DreamCard extends StatelessWidget {
                   children: [
                     // Top section with darker purple and date
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 4),
+                      padding: EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color:
                             Color(0xFF8B2359), // Darker purple for top section
@@ -111,7 +111,7 @@ class DreamCard extends StatelessWidget {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(
-                                  bottom: 3, top: 20, right: 6),
+                                  bottom: 3, top: 20, right: 10),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [

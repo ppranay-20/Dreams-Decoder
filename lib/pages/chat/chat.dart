@@ -4,7 +4,6 @@ import 'package:murkaverse/providers/chat-provider.dart';
 import 'package:murkaverse/providers/user-provider.dart';
 import 'package:murkaverse/utils/snackbar.dart';
 import 'package:murkaverse/widgets/end-chat.dart';
-import 'package:murkaverse/widgets/main-screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:murkaverse/utils/convert-to-uri.dart';
@@ -181,8 +180,7 @@ class _ChatPageState extends State<ChatPage> {
             onPressed: _isLoading
                 ? null
                 : () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MainScreen()));
+                    Navigator.pop(context);
                   },
           ),
         ),
@@ -358,8 +356,8 @@ class _ChatPageState extends State<ChatPage> {
                   : Row(
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Stack(
+                            clipBehavior: Clip.none,
                             children: [
                               TextField(
                                 controller: _messageController,
@@ -375,11 +373,22 @@ class _ChatPageState extends State<ChatPage> {
                                   filled: true,
                                   fillColor: Color(0xFF051D2D),
                                   hintText: "Message",
-                                  hintStyle: TextStyle(color: Colors.white70),
+                                  hintStyle:
+                                      TextStyle(color: Color(0xFF1972A9)),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFF1972A9)),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1972A9), width: 1),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1972A9), width: 1),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1972A9), width: 1),
                                   ),
                                   counterText: _messageController.text.length >=
                                           charaterLimit
@@ -388,6 +397,29 @@ class _ChatPageState extends State<ChatPage> {
                                   counterStyle: TextStyle(color: Colors.red),
                                 ),
                               ),
+                              Positioned(
+                                top: -8,
+                                right: 20,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF051D2D),
+                                    borderRadius: BorderRadius.circular(25),
+                                    border: Border.all(
+                                      color: Color(0xFF1972A9),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "$messageLimit MESSAGES LEFT",
+                                    style: TextStyle(
+                                        color: Color(0xFF1972A9),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 0.4),
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                         ),
