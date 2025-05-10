@@ -77,9 +77,8 @@ class _MainScreenState extends State<MainScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (chatProvider.isLoading || chatProvider.isLoadingChats) return;
 
-    bool isPrevChatClosed = chatProvider.chats[0]['status'] == 'closed' ||
-        chatProvider.chats.isEmpty;
-    final previousChat = chatProvider.chats[0];
+    bool isPrevChatClosed = chatProvider.chats.isEmpty ||
+        chatProvider.chats[0]['status'] == 'closed';
 
     final messageLimit = userProvider.userData?['message_limit'] as int;
     final charLimit = userProvider.userData?['character_limit'] as int;
@@ -95,6 +94,7 @@ class _MainScreenState extends State<MainScreen> {
       final newChat = await chatProvider.createNewChat();
       chat = newChat!;
     } else {
+      final previousChat = chatProvider.chats[0];
       chat = previousChat;
     }
 

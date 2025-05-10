@@ -77,8 +77,9 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  void refreshChats() {
+  void refreshChats() async {
     _hasChatsLoaded = false;
+    await getAllChats();
     notifyListeners();
   }
 
@@ -109,8 +110,8 @@ class ChatProvider extends ChangeNotifier {
         final chat = data['data'];
         setCurrentChat(chat);
         _isLoading = false;
-        notifyListeners();
         refreshChats();
+        notifyListeners();
         return chat;
       } else {
         _isLoading = false;

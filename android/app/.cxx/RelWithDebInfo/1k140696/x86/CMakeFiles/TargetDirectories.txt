@@ -1,0 +1,2 @@
+C:/Users/Asus/OneDrive/Desktop/dreams_decoder/android/app/.cxx/RelWithDebInfo/1k140696/x86/CMakeFiles/edit_cache.dir
+C:/Users/Asus/OneDrive/Desktop/dreams_decoder/android/app/.cxx/RelWithDebInfo/1k140696/x86/CMakeFiles/rebuild_cache.dir
